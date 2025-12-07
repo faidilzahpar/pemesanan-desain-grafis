@@ -18,23 +18,26 @@
 
     <nav class="mt-5 space-y-2 px-4">
 
-        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition
-           @if(Request::is('admin/dashboard')) bg-blue-700 @endif">
+        <a href="{{  route('admin.dashboard') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition
+            {{ Route::is('admin.dashboard') ? 'bg-blue-700' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6m-6 0h-2"/></svg>
             <span>Dashboard</span>
         </a>
 
-        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition">
+        <a href="{{ route('admin.orders') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition 
+            {{ Route::is('admin.orders') ? 'bg-blue-700' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             <span>Pesanan</span>
         </a>
 
-        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition">
+        <a href="{{ route('admin.payments') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition
+            {{ Route::is('admin.payments') ? 'bg-blue-700' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3"/></svg>
             <span>Pembayaran</span>
         </a>
 
-        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition">
+        <a href="{{ route('admin.design-types') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition
+            {{ Route::is('admin.design-types') ? 'bg-blue-700' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414l-2.707-2.707A1 1 0 0015.586 6H7a2 2 0 00-2 2v11a2 2 0 002 2"/></svg>
             <span>Jenis Desain</span>
         </a>

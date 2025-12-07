@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 
+@section('title', 'Dashboard')
 @section('content')
 
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard Admin</h1>

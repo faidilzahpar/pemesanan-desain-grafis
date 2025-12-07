@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DesignTypeController;
 
 Route::get('/', function () {
     return view('home');
@@ -30,11 +31,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         return view('admin.payments.index');
     })->name('admin.payments');
 
-    Route::get('/design-types', function () {
-        return view('admin.design-types.index');
-    })->name('admin.design-types');
+    Route::resource('design-types', DesignTypeController::class);
+    Route::patch('design-types/{id}/toggle', [DesignTypeController::class, 'toggle'])
+    ->name('design-types.toggle');
 });
-
-
 
 require __DIR__.'/auth.php';

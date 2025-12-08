@@ -37,7 +37,7 @@
         </a>
 
         <a href="{{ route('design-types.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition
-            {{ Route::is('admin.design-types') ? 'bg-blue-700' : '' }}">
+            {{ Route::is('design-types.index') ? 'bg-blue-700' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414l-2.707-2.707A1 1 0 0015.586 6H7a2 2 0 00-2 2v11a2 2 0 002 2"/></svg>
             <span>Jenis Desain</span>
         </a>

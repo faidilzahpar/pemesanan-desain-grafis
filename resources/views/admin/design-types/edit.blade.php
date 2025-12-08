@@ -2,6 +2,7 @@
 
 @section('title', 'Edit Jenis Desain')
 @section('content')
+<div class="bg-white shadow-lg rounded-xl p-4 md:p-8 min-h-[calc(100vh-6rem)]">
     {{-- Heading --}}
     <div class="flex items-center justify-between mb-5">
         <h1 class="text-3xl font-bold text-gray-800">Edit Jenis Desain</h1>
@@ -109,8 +110,7 @@
                     <span>Perbarui</span>
                 </button>
             </div>
-
         </form>
-
     </div>
+</div>
 @endsection

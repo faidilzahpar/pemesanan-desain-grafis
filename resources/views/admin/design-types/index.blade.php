@@ -4,6 +4,7 @@
 @section('content')
 
 {{-- Header --}}
+<div class="bg-white shadow-lg rounded-xl p-4 md:p-8 min-h-[calc(100vh-6rem)]">
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 lg:mb-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">
         Kelola Jenis Desain
@@ -156,5 +157,5 @@
 <div class="mt-8 text-center text-sm text-gray-500">
     Total jenis desain: <span class="font-bold">{{ $types->total() }}</span>
 </div>
-
+</div>
 @endsection

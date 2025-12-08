@@ -22,10 +22,8 @@
 
         @include('admin.partials.navigation')
 
-        <main class="p-4 md:p-6 transition-all duration-300":class="'md:ml-64'">
-            <div class="bg-white shadow-lg rounded-xl p-4 md:p-8 min-h-[calc(100vh-6rem)]">
+        <main class="p-4 md:p-6 transition-all duration-300":class="'md:ml-64'">      
                 @yield('content')
-            </div>
         </main>
     </div>
 </body>

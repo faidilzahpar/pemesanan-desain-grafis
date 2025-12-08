@@ -2,7 +2,7 @@
 
 @section('title', 'Dashboard')
 @section('content')
-
+<div class="bg-white shadow-lg rounded-xl p-4 md:p-8 min-h-[calc(100vh-6rem)]">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard Admin</h1>
 
     {{-- Statistik Cards --}}
@@ -55,6 +55,6 @@
             </div>
             <p class="text-3xl font-extrabold text-gray-900 mt-2">28</p>
         </div>
-
     </div>
+</div>
 @endsection

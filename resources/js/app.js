@@ -37,3 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(err => console.error("Error:", err));
     }
 });
+
+// Toggle di halaman edit
+const toggle = document.getElementById('statusToggle');
+        const text = document.getElementById('statusText');
+
+        toggle.addEventListener('change', () => {
+            text.textContent = toggle.checked ? 'Aktif' : 'Nonaktif';
+        });

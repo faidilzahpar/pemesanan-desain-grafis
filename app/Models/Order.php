@@ -59,4 +59,9 @@ class Order extends Model
     {
         return $this->belongsTo(DesignType::class, 'design_type_id', 'design_type_id');
     }
+
+    public function orderFiles()
+    {
+        return $this->hasMany(OrderFile::class, 'order_id', 'order_id');
+    }
 }

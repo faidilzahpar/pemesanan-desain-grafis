@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DesignTypeController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\DesignTypeController;
 
 Route::get('/', function () {
     return view('home');
@@ -23,9 +24,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
-    Route::get('/orders', function () {
-        return view('admin.orders.index');
-    })->name('admin.orders');
+    Route::get('/orders', [AdminOrderController::class, 'index'])
+        ->name('admin.orders.index');
+
+    Route::get('/orders/{order}', [AdminOrderController::class, 'show'])
+        ->name('admin.orders.show');
 
     Route::get('/payments', function () {
         return view('admin.payments.index');

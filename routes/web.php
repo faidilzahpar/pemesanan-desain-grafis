@@ -7,6 +7,9 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\DesignTypeController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PortfolioController;
+
+Route::get('/portfolio', [PortfolioController::class, 'index'])->name('portfolio');
 
 Route::get('/', function () {
     return view('home');

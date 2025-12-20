@@ -57,7 +57,7 @@
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
                 <a href="{{ route('register') }}" class="bg-slate-900 text-white px-10 py-4 rounded-full font-bold text-lg hover:shadow-2xl transition shadow-xl">Konsultasi Gratis</a>
-                <a href="#layanan" class="bg-white border border-slate-200 text-slate-900 px-10 py-4 rounded-full font-bold text-lg hover:bg-slate-50 transition">Lihat Portofolio</a>
+                <a href="portfolio" class="bg-white border border-slate-200 text-slate-900 px-10 py-4 rounded-full font-bold text-lg hover:bg-slate-50 transition">Lihat Portofolio</a>
             </div>
         </div>
     </section>

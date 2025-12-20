@@ -25,13 +25,13 @@
         </a>
 
         <a href="{{ route('admin.orders.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition 
-            {{ Route::is('admin.orders') ? 'bg-blue-700' : '' }}">
+            {{ Route::is('admin.orders.index') ? 'bg-blue-700' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             <span>Pesanan</span>
         </a>
 
-        <a href="{{ route('admin.payments') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition
-            {{ Route::is('admin.payments') ? 'bg-blue-700' : '' }}">
+        <a href="{{ route('admin.payments.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition
+            {{ Route::is('admin.payments.index') ? 'bg-blue-700' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3"/></svg>
             <span>Pembayaran</span>
         </a>

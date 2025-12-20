@@ -41,4 +41,18 @@ class Invoice extends Model
             $model->invoice_id = "INV{$year}{$kodeJenis}{$angkaOrder}";
         });
     }
+
+    public function getJumlahBayarAttribute()
+    {
+        $harga = $this->order->designType->harga;
+
+        return $this->jenis_invoice === 'DP'
+            ? $harga * 0.5
+            : $harga * 0.5;
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id', 'order_id');
+    }
 }

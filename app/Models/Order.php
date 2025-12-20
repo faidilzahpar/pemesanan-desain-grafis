@@ -20,6 +20,10 @@ class Order extends Model
         'deadline',
     ];
 
+    protected $casts = [
+        'deadline' => 'datetime',
+    ];
+
     protected static function boot()
     {
         parent::boot();
@@ -63,5 +67,10 @@ class Order extends Model
     public function orderFiles()
     {
         return $this->hasMany(OrderFile::class, 'order_id', 'order_id');
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'order_id', 'order_id');
     }
 }

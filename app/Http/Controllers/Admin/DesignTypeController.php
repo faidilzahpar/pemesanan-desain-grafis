@@ -11,14 +11,10 @@ class DesignTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        // Jika mobile → limit 5, jika desktop → limit 10
-        $perPage = $request->header('User-Agent') && preg_match('/Mobile|Android|iPhone/', $request->header('User-Agent'))
-                    ? 5
-                    : 10;
-
-        $types = DesignType::paginate($perPage);
+        $types = DesignType::orderBy('created_at', 'desc')
+            ->paginate(10);
 
         return view('admin.design-types.index', compact('types'));
     }

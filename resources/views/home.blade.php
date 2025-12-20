@@ -1,100 +1,108 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CreativeDesign - Jasa Desain Grafis Profesional</title>
+@extends('layouts.main')
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800" rel="stylesheet" />
+@section('title', 'CreativeDesign - Jasa Desain Grafis Profesional')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+@section('content')
 
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-900 antialiased">
+<section class="pt-32 pb-20 px-6">
+    <div class="max-w-7xl mx-auto text-center">
+        <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full
+                     text-sm font-bold tracking-wide uppercase mb-6 inline-block">
+            Solusi Visual No. 1
+        </span>
 
-    <header class="fixed w-full z-50 glass border-b border-slate-200">
-        <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                    <span class="text-white font-bold text-xl">D</span>
-                </div>
-                <span class="font-extrabold text-xl tracking-tight">Creative<span class="text-indigo-600">Design</span></span>
-            </div>
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]">
+            Ubah Ide Menjadi <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r
+                         from-indigo-600 to-violet-600">
+                Desain Luar Biasa
+            </span>
+        </h1>
 
-            <div class="hidden md:flex items-center gap-8 font-medium text-slate-600">
-                <a href="#layanan" class="hover:text-indigo-600 transition">Layanan</a>
-                <a href="#harga" class="hover:text-indigo-600 transition">Harga</a>
-            </div>
+        <p class="text-lg text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Kami membantu bisnis Anda tampil lebih profesional dengan desain Logo,
+            Branding, dan Media Sosial yang estetik serta pengerjaan cepat.
+        </p>
 
-            <div class="flex items-center gap-4">
-                @if (Route::has('login'))
-                    @auth
-                        <a href="{{ url('/dashboard') }}" class="font-semibold text-indigo-600">Dashboard</a>
-                    @else
-                        <a href="{{ route('login') }}" class="text-slate-600 font-medium hover:text-indigo-600 transition">Masuk</a>
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="bg-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold shadow-md hover:bg-indigo-700 transition transform hover:scale-105 active:scale-95">Mulai Order</a>
-                        @endif
-                    @endauth
-                @endif
-            </div>
-        </nav>
-    </header>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{{ route('register') }}"
+               class="bg-slate-900 text-white px-10 py-4 rounded-full
+                      font-bold text-lg shadow-xl hover:shadow-2xl transition">
+                Konsultasi Gratis
+            </a>
+            <a href="#"
+               class="bg-white border border-slate-200 text-slate-900 px-10 py-4
+                      rounded-full font-bold text-lg hover:bg-slate-50 transition">
+                Lihat Portofolio
+            </a>
+        </div>
+    </div>
+</section>
 
-    <section class="pt-40 pb-20 px-6">
-        <div class="max-w-7xl mx-auto text-center">
-            <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide uppercase mb-6 inline-block">Solusi Visual No. 1</span>
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-[1.1]">
-                Ubah Ide Menjadi <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Desain Luar Biasa</span>
-            </h1>
-            <p class="text-lg text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Kami membantu bisnis Anda tampil lebih profesional dengan desain Logo, Branding, dan Media Sosial yang estetik serta pengerjaan cepat.
+{{-- SECTION LAYANAN --}}
+<section id="layanan" class="py-24 px-6 bg-slate-50/50">
+    <div class="max-w-7xl mx-auto">
+
+        {{-- Heading --}}
+        <div class="text-center mb-16">
+            <span class="text-indigo-600 text-sm font-bold tracking-widest uppercase mb-3 block">
+                Pilihan Layanan
+            </span>
+            <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                Solusi Desain <span class="text-indigo-600">Terbaik</span>
+            </h2>
+            <p class="text-slate-500 max-w-xl mx-auto text-lg">
+                Kami menyediakan berbagai kategori desain untuk meningkatkan nilai visual brand dan bisnis Anda.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="{{ route('register') }}" class="bg-slate-900 text-white px-10 py-4 rounded-full font-bold text-lg hover:shadow-2xl transition shadow-xl">Konsultasi Gratis</a>
-                <a href="portfolio" class="bg-white border border-slate-200 text-slate-900 px-10 py-4 rounded-full font-bold text-lg hover:bg-slate-50 transition">Lihat Portofolio</a>
-            </div>
         </div>
-    </section>
 
-    <section id="layanan" class="py-24 px-6 bg-white border-y border-slate-100">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold mb-4">Layanan Unggulan Kami</h2>
-                <p class="text-slate-500">Semua kebutuhan desain Anda dalam satu tempat.</p>
-            </div>
+        {{-- LIST JENIS DESAIN --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach($designTypes as $type)
+                <div class="group relative bg-white p-8 rounded-[2rem] border border-slate-200 
+                            hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-100 
+                            transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
+                    
+                    {{-- Header Card --}}
+                    <div class="flex justify-between items-start gap-4 mb-4">
+                        <h3 class="text-2xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">
+                            {{ $type->nama_jenis }}
+                        </h3>
+                        
+                        <span class="shrink-0 inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-indigo-100">
+                            {{ $type->durasi }} Hari
+                        </span>
+                    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="group p-8 rounded-3xl border border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition">
-                    <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">💎</div>
-                    <h3 class="text-xl font-bold mb-3">Branding & Logo</h3>
-                    <p class="text-slate-500 leading-relaxed">Membangun identitas brand yang kuat dan ikonik untuk bisnis Anda.</p>
+                    <p class="text-slate-500 leading-relaxed flex-grow">
+                        {{ $type->deskripsi }}
+                    </p>
+
+                    {{-- Footer Card --}}
+                    <div class="pt-3 border-t border-slate-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Mulai dari</p>
+                                <p class="text-2xl font-extrabold text-slate-900">
+                                    <span class="text-sm font-medium mr-0.5">Rp</span>{{ number_format($type->harga, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Tombol Order --}}
+                        <button class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold 
+                                       hover:bg-indigo-600 shadow-sm hover:shadow-indigo-200 
+                                       transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                                onclick="window.location.href='{{ route('register') }}'">
+                            Pesan Sekarang
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-
-                <div class="group p-8 rounded-3xl border border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition">
-                    <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">📸</div>
-                    <h3 class="text-xl font-bold mb-3">Social Media Design</h3>
-                    <p class="text-slate-500 leading-relaxed">Konten Instagram dan TikTok yang estetik untuk meningkatkan engagement.</p>
-                </div>
-
-                <div class="group p-8 rounded-3xl border border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition">
-                    <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">🚀</div>
-                    <h3 class="text-xl font-bold mb-3">Marketing Kit</h3>
-                    <p class="text-slate-500 leading-relaxed">Desain banner, poster, dan brosur untuk promosi yang lebih maksimal.</p>
-                </div>
-            </div>
+            @endforeach
         </div>
-    </section>
-
-    <footer class="py-12 px-6 text-center text-slate-400 border-t border-slate-100">
-        <p class="text-sm uppercase font-bold tracking-widest mb-4">CreativeDesign Studio</p>
-        <p>&copy; {{ date('Y') }} Projek Pemesanan Desain Grafis. All rights reserved.</p>
-    </footer>
-
-</body>
-</html>
+    </div>
+</section>
+@endsection

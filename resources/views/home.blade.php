@@ -30,7 +30,7 @@
                       font-bold text-lg shadow-xl hover:shadow-2xl transition">
                 Konsultasi Gratis
             </a>
-            <a href="#"
+            <a href="portfolio"
                class="bg-white border border-slate-200 text-slate-900 px-10 py-4
                       rounded-full font-bold text-lg hover:bg-slate-50 transition">
                 Lihat Portofolio

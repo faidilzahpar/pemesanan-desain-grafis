@@ -1,22 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Portofolio Kami - CreativeDesign</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,600,700" rel="stylesheet" />
-</head>
-<body class="bg-slate-50 font-['Plus_Jakarta_Sans']">
+@extends('layouts.main')
 
-    <nav class="bg-white border-b border-slate-200 py-6">
-        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
-            <a href="/" class="text-xl font-bold text-indigo-600">← Kembali ke Utama</a>
-            <h1 class="text-2xl font-extrabold text-slate-900">Portofolio Desain</h1>
-        </div>
-    </nav>
+@section('title', 'Portofolio Kami')
 
-    <div class="py-16 px-6">
+@section('content')
+
+<div class="py-16 px-6">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                 @forelse($portofolios as $item)
@@ -37,6 +25,4 @@
             </div>
         </div>
     </div>
-
-</body>
-</html>
+@endsection

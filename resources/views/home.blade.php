@@ -1,10 +1,10 @@
 @extends('layouts.main')
 
-@section('title', 'CreativeDesign - Jasa Desain Grafis Profesional')
+@section('title', 'Jasa Desain Grafis Profesional')
 
 @section('content')
 
-<section class="pt-32 pb-20 px-6">
+<section id="home" class="pt-32 pb-20 px-6">
     <div class="max-w-7xl mx-auto text-center">
         <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full
                      text-sm font-bold tracking-wide uppercase mb-6 inline-block">
@@ -24,18 +24,13 @@
             Branding, dan Media Sosial yang estetik serta pengerjaan cepat.
         </p>
 
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="{{ route('register') }}"
+       
+            <a href="{{ route('portfolio') }}"
                class="bg-slate-900 text-white px-10 py-4 rounded-full
                       font-bold text-lg shadow-xl hover:shadow-2xl transition">
-                Konsultasi Gratis
-            </a>
-            <a href="portfolio"
-               class="bg-white border border-slate-200 text-slate-900 px-10 py-4
-                      rounded-full font-bold text-lg hover:bg-slate-50 transition">
                 Lihat Portofolio
             </a>
-        </div>
+        
     </div>
 </section>
 

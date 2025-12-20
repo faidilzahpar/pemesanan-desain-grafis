@@ -77,7 +77,7 @@
                     <div class="pt-3 border-t border-slate-100">
                         <div class="flex items-center justify-between mb-6">
                             <div>
-                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Mulai dari</p>
+                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Harga</p>
                                 <p class="text-2xl font-extrabold text-slate-900">
                                     <span class="text-sm font-medium mr-0.5">Rp</span>{{ number_format($type->harga, 0, ',', '.') }}
                                 </p>

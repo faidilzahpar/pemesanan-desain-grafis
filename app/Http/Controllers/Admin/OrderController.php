@@ -40,36 +40,44 @@ class OrderController extends Controller
             'file' => 'required|file|max:10240',
         ]);
 
-        // Hitung revisi
+        $totalFiles  = $order->orderFiles()->count();
         $revisiCount = $order->orderFiles()
             ->where('tipe_file', 'Revisi')
             ->count();
 
-        // Tentukan tipe file
-        if ($order->orderFiles()->count() === 0) {
-            $tipe = 'Awal';
-        } elseif ($revisiCount >= 2) {
-            // Revisi ke-3 → Final
-            $tipe = 'Final';
-        } else {
+        /*
+        ALUR:
+        1. File pertama  → Preview
+        2. Revisi 1–2    → Revisi
+        3. Revisi ke-3   → Final
+        */
+
+        if ($totalFiles === 0) {
+            $tipe = 'Preview';
+        } elseif ($revisiCount < 3) {
             $tipe = 'Revisi';
+        } else {
+            $tipe = 'Final';
         }
 
-        // Simpan file
         $path = $request->file('file')
             ->store("order-files/{$order->order_id}", 'public');
 
-        // Simpan ke DB
         $order->orderFiles()->create([
             'tipe_file' => $tipe,
             'path_file' => $path,
         ]);
 
-        // Update status order
+        // Status pesanan
         $order->update([
-            'status_pesanan' => 'Menunggu Konfirmasi Pelanggan',
+            'status_pesanan' => $tipe === 'Final'
+                ? 'Selesai'
+                : 'Menunggu Konfirmasi Pelanggan',
         ]);
 
-        return back()->with('success', 'File desain berhasil diunggah.');
+        return back()->with(
+            'success',
+            "File {$tipe} berhasil diunggah."
+        );
     }
 }

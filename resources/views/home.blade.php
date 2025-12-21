@@ -84,14 +84,17 @@
                             </div>
                         </div>
 
-                        {{-- Tombol Order --}}
-                        <button class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold 
-                                       hover:bg-indigo-600 shadow-sm hover:shadow-indigo-200 
-                                       transition-all duration-300 flex items-center justify-center gap-2 group/btn"
-                                onclick="window.location.href='{{ route('register') }}'">
+                        <button
+                            class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold 
+                                hover:bg-indigo-600 shadow-sm hover:shadow-indigo-200 
+                                transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                            onclick="window.location.href='{{ route('orders.create', ['design' => $type->design_type_id]) }}'">
                             Pesan Sekarang
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 group-hover/btn:translate-x-1 transition-transform"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                             </svg>
                         </button>
                     </div>

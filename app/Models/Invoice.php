@@ -51,6 +51,12 @@ class Invoice extends Model
             : $harga * 0.5;
     }
 
+    public function isExpired()
+    {
+        return $this->status_pembayaran === 'Belum Dibayar'
+            && $this->created_at->addHours(24)->isPast();
+    }
+
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id', 'order_id');

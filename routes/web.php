@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DesignTypeController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PortfolioController;
+use App\Http\Controllers\OrderController;
 
 Route::get('/portfolio', [PortfolioController::class, 'index'])->name('portfolio');
 
@@ -28,6 +29,12 @@ Route::middleware('auth')->group(function () {
         ->name('invoices.verify');
     Route::post('/invoices/{invoice}/reject', [InvoiceController::class, 'reject'])
         ->name('invoices.reject');
+    Route::get('/order', [OrderController::class, 'create'])
+        ->name('orders.create');
+    Route::post('/order', [OrderController::class, 'store'])
+        ->name('orders.store');
+    Route::post('/invoices/{invoice}/upload', [InvoiceController::class, 'upload'])
+        ->name('invoices.upload');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {

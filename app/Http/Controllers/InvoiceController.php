@@ -10,10 +10,12 @@ class InvoiceController extends Controller
 {
     public function show(Invoice $invoice)
     {
+        $this->handleAutoExpire($invoice);
+
         $paymentDeadline = $invoice->created_at->copy()->addHours(24);
 
-        $isExpired = $invoice->status_pembayaran === 'Belum Dibayar'
-            && now()->greaterThan($paymentDeadline);
+        $isExpired =
+            $invoice->status_pembayaran === 'Pembayaran Expired';
 
         $invoice->load([
             'order.user',
@@ -29,58 +31,61 @@ class InvoiceController extends Controller
 
     public function verify(Request $request, Invoice $invoice)
     {
-        // Pastikan hanya admin
-        abort_if(
-            !Auth::check() || Auth::user()->is_admin != 1,
-            403
-        );
+        abort_if(!Auth::check() || Auth::user()->is_admin != 1, 403);
 
-        // Pastikan status masih menunggu verifikasi
         if ($invoice->status_pembayaran !== 'Menunggu Verifikasi') {
             return back()->with('error', 'Invoice ini sudah diproses.');
         }
 
         $order = $invoice->order;
 
-        // Update invoice
         $invoice->update([
             'status_pembayaran' => 'Pembayaran Diterima',
         ]);
 
-        // Update order
-        $order->update([
-            'status_pesanan' => 'Sedang Dikerjakan',
-            'deadline' => now()->addDays($order->designType->durasi),
-        ]);
+        // LOGIKA BERDASARKAN JENIS INVOICE
+        if ($invoice->jenis_invoice === 'DP') {
+            $order->update([
+                'status_pesanan' => 'Sedang Dikerjakan',
+                'deadline' => now()->addDays($order->designType->durasi),
+            ]);
+        }
+
+        if ($invoice->jenis_invoice === 'Pelunasan') {
+            $order->update([
+                'status_pesanan' => 'Selesai',
+            ]);
+        }
 
         return redirect()
             ->route('invoices.show', $invoice->invoice_id)
-            ->with('success', 'Pembayaran berhasil diterima.');
+            ->with('success', 'Pembayaran berhasil diverifikasi.');
     }
+
     public function reject(Request $request, Invoice $invoice)
     {
-        // Pastikan hanya admin
-        abort_if(
-            !Auth::check() || Auth::user()->is_admin != 1,
-            403
-        );
+        abort_if(!Auth::check() || Auth::user()->is_admin != 1, 403);
 
-        // Pastikan status masih menunggu verifikasi
         if ($invoice->status_pembayaran !== 'Menunggu Verifikasi') {
             return back()->with('error', 'Invoice ini sudah diproses.');
         }
 
-        $order = $invoice->order;
-
-        // Update invoice
         $invoice->update([
             'status_pembayaran' => 'Pembayaran Ditolak',
         ]);
 
-        // Kembalikan order ke menunggu pembayaran
-        $order->update([
-            'status_pesanan' => 'Menunggu Pembayaran',
-        ]);
+        // KEMBALIKAN STATUS ORDER SESUAI JENIS INVOICE
+        if ($invoice->jenis_invoice === 'DP') {
+            $invoice->order->update([
+                'status_pesanan' => 'Menunggu DP',
+            ]);
+        }
+
+        if ($invoice->jenis_invoice === 'Pelunasan') {
+            $invoice->order->update([
+                'status_pesanan' => 'Menunggu Pelunasan',
+            ]);
+        }
 
         return redirect()
             ->route('invoices.show', $invoice->invoice_id)
@@ -89,14 +94,20 @@ class InvoiceController extends Controller
 
     public function upload(Request $request, Invoice $invoice)
     {
-        if (
-            $invoice->status_pembayaran === 'Belum Dibayar'
-            && $invoice->created_at->addHours(24)->isPast()
-        ) {
+        abort_if(!Auth::check() || Auth::user()->is_admin == 1, 403);
+
+        // ❗ CEK EXPIRED
+        if ($invoice->status_pembayaran === 'Pembayaran Expired') {
             return back()->with('error', 'Invoice sudah expired.');
         }
 
-        abort_if(!Auth::check() || Auth::user()->is_admin == 1, 403);
+        // ❗ CEK STATUS PESANAN
+        if (!in_array($invoice->order->status_pesanan, [
+            'Menunggu DP',
+            'Menunggu Pelunasan',
+        ])) {
+            return back()->with('error', 'Pesanan tidak berada pada tahap pembayaran.');
+        }
 
         $request->validate([
             'bukti_pembayaran' => 'required|file|max:10240',
@@ -106,11 +117,27 @@ class InvoiceController extends Controller
             ->store('bukti-pembayaran', 'public');
 
         $invoice->update([
-            'bukti_path' => $path,
+            'bukti_path'        => $path,
             'status_pembayaran' => 'Menunggu Verifikasi',
             'tgl_bayar'         => now(),
         ]);
 
         return back()->with('success', 'Bukti pembayaran berhasil diunggah.');
+    }
+
+    private function handleAutoExpire(Invoice $invoice)
+    {
+        if (
+            $invoice->status_pembayaran === 'Belum Dibayar' &&
+            $invoice->created_at->addHours(24)->isPast()
+        ) {
+            $invoice->update([
+                'status_pembayaran' => 'Pembayaran Expired',
+            ]);
+
+            $invoice->order->update([
+                'status_pesanan' => 'Dibatalkan',
+            ]);
+        }
     }
 }

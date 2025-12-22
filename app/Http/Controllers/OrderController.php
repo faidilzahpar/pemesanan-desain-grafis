@@ -12,6 +12,54 @@ use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
+    public function index(Request $request)
+    {
+        $status = $request->query('status', 'all');
+
+        $query = Order::with([
+                'designType',
+                'invoices'
+            ])
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc');
+
+        // FILTER STATUS
+        match ($status) {
+        'unpaid' => $query->whereIn('status_pesanan', [
+            'Menunggu DP',
+            'Menunggu Pelunasan',
+        ]),
+        'process' => $query->whereIn('status_pesanan', [
+            'Sedang Dikerjakan',
+            'Menunggu Konfirmasi Pelanggan',
+            'Revisi',
+        ]),
+        'done' => $query->where('status_pesanan', 'Selesai'),
+        'cancel' => $query->where('status_pesanan', 'Dibatalkan'),
+        default => null,
+    };
+
+        $orders = $query->get();
+
+        return view('orders.index', compact('orders'));
+    }
+
+    public function show(Order $order)
+    {
+        // Pastikan hanya pemilik order yang bisa melihat
+        abort_if($order->user_id !== Auth::id(), 403);
+
+        $order->load([
+            'designType',
+            'orderFiles' => function ($q) {
+                $q->orderBy('created_at', 'asc');
+            },
+            'invoices'
+        ]);
+
+        return view('orders.show', compact('order'));
+    }
+
     public function create(Request $request)
     {
         $designTypes = DesignType::where('is_active', 1)
@@ -62,7 +110,7 @@ class OrderController extends Controller
             'deskripsi'         => $request->deskripsi,
             'referensi_desain'  => $referensiPath,
             'metode_pembayaran' => $request->metode_pembayaran,
-            'status_pesanan'    => 'Menunggu Pembayaran',
+            'status_pesanan'    => 'Menunggu DP',
             'deadline'          => null,
         ]);
 
@@ -78,5 +126,31 @@ class OrderController extends Controller
         return redirect()
             ->route('invoices.show', $invoice->invoice_id)
             ->with('success', 'Pesanan berhasil dibuat. Silakan lakukan pembayaran DP.');       
+    }
+
+    public function approve(Order $order)
+    {
+        abort_if(!Auth::check(), 403);
+        abort_if($order->user_id !== Auth::id(), 403);
+
+        if ($order->status_pesanan !== 'Menunggu Konfirmasi Pelanggan') {
+            return back()->with('error', 'Pesanan tidak dapat disetujui pada tahap ini.');
+        }
+
+        // Pastikan ada file desain
+        if ($order->orderFiles()->count() === 0) {
+            return back()->with('error', 'Belum ada file desain untuk disetujui.');
+        }
+
+        // Update status → menunggu pelunasan
+        $order->update([
+            'status_pesanan' => 'Menunggu Pelunasan',
+        ]);
+
+        // (opsional, nanti) buat invoice pelunasan di sini
+
+        return redirect()
+            ->route('orders.show', $order->order_id)
+            ->with('success', 'Desain disetujui. Silakan lakukan pelunasan.');
     }
 }

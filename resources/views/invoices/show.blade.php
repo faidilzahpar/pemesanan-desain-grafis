@@ -62,15 +62,22 @@
 
             {{-- DEADLINE / TANGGAL BAYAR --}}
             <p>
+                @php
+                    $isWaitingPayment = in_array(
+                        $invoice->order->status_pesanan,
+                        ['Menunggu DP', 'Menunggu Pelunasan']
+                    );
+                @endphp
+
                 <span class="text-gray-500">
-                    {{ $invoice->tgl_bayar ? 'Tanggal Bayar:' : 'Batas Pembayaran:' }}
+                    {{ $isWaitingPayment ? 'Batas Pembayaran:' : 'Tanggal Bayar:' }}
                 </span>
 
                 <span class="{{ $isExpired ? 'text-red-600 font-semibold' : 'text-gray-800' }}">
-                    @if($invoice->tgl_bayar)
-                        {{ \Carbon\Carbon::parse($invoice->tgl_bayar)->translatedFormat('d F Y, H:i') }}
-                    @else
+                    @if($isWaitingPayment)
                         {{ $paymentDeadline->translatedFormat('d F Y, H:i') }}
+                    @else
+                        {{ \Carbon\Carbon::parse($invoice->tgl_bayar)->translatedFormat('d F Y, H:i') }}
                     @endif
                 </span>
             </p>
@@ -111,9 +118,9 @@
             Bukti Pembayaran
         </h2>
 
+        {{-- TAMPILKAN BUKTI (JIKA ADA) --}}
         @if($invoice->bukti_path)
-            {{-- WRAPPER CENTER --}}
-            <div class="flex flex-col items-center">
+            <div class="flex flex-col items-center mb-6">
 
                 {{-- Thumbnail --}}
                 <div class="relative group w-full max-w-xs">
@@ -133,7 +140,6 @@
                     </div>
                 </div>
 
-                {{-- Tombol Lihat Bukti --}}
                 <button
                     @click="open = true"
                     class="mt-4 px-4 py-2 bg-blue-600 text-white
@@ -149,7 +155,6 @@
                         bg-gray-900/95 backdrop-blur-sm p-4"
                 @click.self="open = false">
 
-                {{-- Close --}}
                 <button @click="open = false"
                         class="absolute top-5 right-5
                             text-white/70 hover:text-white transition">
@@ -162,159 +167,123 @@
                     </svg>
                 </button>
 
-                {{-- CONTENT --}}
-                <div class="flex flex-col items-center max-w-full">
-                    <img src="{{ asset('storage/' . $invoice->bukti_path) }}"
-                        class="max-w-full max-h-[85vh] rounded-lg
-                                shadow-2xl border border-white/20 bg-white">
+                <img src="{{ asset('storage/' . $invoice->bukti_path) }}"
+                    class="max-w-full max-h-[85vh] rounded-lg
+                            shadow-2xl border border-white/20 bg-white">
 
-                    {{-- AKSI ADMIN --}}
-                    @if($invoice->status_pembayaran === 'Menunggu Verifikasi'
-                        && auth()->check()
-                        && auth()->user()->is_admin == 1)
+                {{-- AKSI ADMIN --}}
+                @if(
+                    $invoice->status_pembayaran === 'Menunggu Verifikasi'
+                    && auth()->check()
+                    && auth()->user()->is_admin == 1
+                )
+                    <div class="mt-6 flex space-x-4">
+                        <form method="POST"
+                            action="{{ route('invoices.verify', $invoice->invoice_id) }}">
+                            @csrf
+                            <button type="submit"
+                                    class="px-6 py-2 bg-green-600 text-white
+                                        rounded-lg hover:bg-green-700
+                                        font-semibold transition">
+                                Terima
+                            </button>
+                        </form>
 
-                        <div class="mt-6 flex space-x-4">
-                            <form method="POST"
-                                action="{{ route('invoices.verify', $invoice->invoice_id) }}">
-                                @csrf
-                                <button type="submit"
-                                        class="px-6 py-2 bg-green-600 text-white
-                                            rounded-lg hover:bg-green-700
-                                            font-semibold transition">
-                                    Terima
-                                </button>
-                            </form>
-
-                            <form method="POST"
-                                action="{{ route('invoices.reject', $invoice->invoice_id) }}">
-                                @csrf
-                                <button type="submit"
-                                        class="px-6 py-2 bg-red-600 text-white
-                                            rounded-lg hover:bg-red-700
-                                            font-semibold transition">
-                                    Tolak
-                                </button>
-                            </form>
-                        </div>
-                    @endif
-                </div>
+                        <form method="POST"
+                            action="{{ route('invoices.reject', $invoice->invoice_id) }}">
+                            @csrf
+                            <button type="submit"
+                                    class="px-6 py-2 bg-red-600 text-white
+                                        rounded-lg hover:bg-red-700
+                                        font-semibold transition">
+                                Tolak
+                            </button>
+                        </form>
+                    </div>
+                @endif
             </div>
-        @else
-            {{-- TEKS DEFAULT --}}
-            <p class="text-gray-500 italic text-center mb-4">
-                Bukti pembayaran belum diunggah.
-            </p>
+        @endif
 
-            {{-- FORM UPLOAD (KHUSUS USER & BELUM EXPIRED) --}}
-            @if(!$isExpired
-                && auth()->check()
-                && auth()->user()->is_admin == 0
-                && $invoice->status_pembayaran === 'Belum Dibayar')
+        {{-- FORM UPLOAD / REPLACE BUKTI --}}
+        @if(
+            !$isExpired
+            && auth()->check()
+            && auth()->user()->is_admin == 0
+            && in_array($invoice->order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
+            && $invoice->status_pembayaran !== 'Pembayaran Diterima'
+        )
 
-                <form
-                    action="{{ route('invoices.upload', $invoice->invoice_id) }}"
-                    method="POST"
-                    enctype="multipart/form-data"
-                    class="space-y-4"
-                    x-data="{ file: null, preview: null }"
-                >
-                    @csrf
+            <form
+                action="{{ route('invoices.upload', $invoice->invoice_id) }}"
+                method="POST"
+                enctype="multipart/form-data"
+                class="space-y-4"
+                x-data="{ file: null, preview: null }"
+            >
+                @csrf
 
-                    {{-- DROPZONE --}}
-                    <div class="border border-dashed border-indigo-300 rounded-xl p-6 bg-indigo-50/40">
+                <div class="border border-dashed border-indigo-300 rounded-xl p-6 bg-indigo-50/40">
+                    <input
+                        type="file"
+                        name="bukti_pembayaran"
+                        x-ref="fileInput"
+                        accept="image/*,.pdf"
+                        class="hidden"
+                        required
+                        @change="
+                            file = $event.target.files[0];
+                            preview = file && file.type.startsWith('image/')
+                                ? URL.createObjectURL(file)
+                                : null;
+                        "
+                    >
 
-                        {{-- Hidden Input --}}
-                        <input
-                            type="file"
-                            name="bukti_pembayaran"
-                            x-ref="fileInput"
-                            accept="image/*,.pdf"
-                            class="hidden"
-                            required
-                            @change="
-                                file = $event.target.files[0];
-                                if (file && file.type.startsWith('image/')) {
-                                    preview = URL.createObjectURL(file);
-                                } else {
-                                    preview = null;
-                                }
-                            "
-                        >
+                    <div
+                        @click="$refs.fileInput.click()"
+                        class="cursor-pointer bg-white rounded-xl p-6 text-center
+                            hover:bg-indigo-50 transition"
+                    >
+                        <template x-if="!file">
+                            <div>
+                                <p class="font-semibold text-slate-700">
+                                    Klik untuk upload / ganti bukti pembayaran
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    JPG, PNG, atau PDF (maks. 10MB)
+                                </p>
+                            </div>
+                        </template>
 
-                        {{-- Area klik --}}
-                        <div
-                            @click="$refs.fileInput.click()"
-                            class="cursor-pointer bg-white rounded-xl p-6 text-center hover:bg-indigo-50 transition"
-                        >
-
-                            {{-- BELUM ADA FILE --}}
-                            <template x-if="!file">
-                                <div>
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="mx-auto h-10 w-10 text-indigo-500 mb-3"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M12 3v13.5m0 0l4.5-4.5M12 16.5l-4.5-4.5"/>
-                                    </svg>
-
-                                    <p class="font-semibold text-slate-700">
-                                        Klik untuk upload bukti pembayaran
-                                    </p>
-                                    <p class="text-xs text-slate-500 mt-1">
-                                        JPG, PNG, atau PDF (maks. 10MB)
-                                    </p>
-                                </div>
-                            </template>
-
-                            {{-- ADA FILE --}}
-                            <template x-if="file">
-                                <div class="flex flex-col items-center space-y-2">
-                                    <template x-if="preview">
-                                        <img :src="preview"
-                                            class="max-h-40 rounded-lg border shadow">
-                                    </template>
-
-                                    <template x-if="!preview">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            class="h-12 w-12 text-gray-400"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M9 12h6m-3-3v6"/>
-                                        </svg>
-                                    </template>
-
-                                    <p class="text-sm font-semibold" x-text="file.name"></p>
-                                    <p class="text-xs text-slate-500"
+                        <template x-if="file">
+                            <div class="flex flex-col items-center space-y-2">
+                                <img x-show="preview"
+                                    :src="preview"
+                                    class="max-h-40 rounded-lg border shadow">
+                                <p class="text-sm font-semibold" x-text="file.name"></p>
+                                <p class="text-xs text-slate-500"
                                     x-text="(file.size / 1024 / 1024).toFixed(2) + ' MB'"></p>
-                                </div>
-                            </template>
-                        </div>
+                            </div>
+                        </template>
                     </div>
+                </div>
 
-                    {{-- SUBMIT --}}
-                    <div class="text-center">
-                        <button
-                            type="submit"
-                            class="px-6 py-2 bg-indigo-600 text-white rounded-lg
-                                hover:bg-indigo-700 transition font-semibold"
-                        >
-                            Upload Bukti Pembayaran
-                        </button>
-                    </div>
-                </form>
+                <div class="text-center">
+                    <button
+                        type="submit"
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg
+                            hover:bg-indigo-700 transition font-semibold"
+                    >
+                        Upload Bukti Pembayaran
+                    </button>
+                </div>
+            </form>
 
-            {{-- JIKA EXPIRED --}}
-            @elseif($isExpired)
-                <p class="text-red-600 italic text-center">
-                    Invoice telah expired. Silakan buat pesanan baru.
-                </p>
-            @endif
+        @elseif($isExpired)
+            <p class="text-red-600 italic text-center">
+                Invoice telah expired. Silakan buat pesanan baru.
+            </p>
         @endif
     </div>
-
-
 
     {{-- BACK --}}
     <div class="flex justify-end space-x-3">

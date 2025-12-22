@@ -35,6 +35,12 @@ Route::middleware('auth')->group(function () {
         ->name('orders.store');
     Route::post('/invoices/{invoice}/upload', [InvoiceController::class, 'upload'])
         ->name('invoices.upload');
+    Route::get('/pesanan-saya', [OrderController::class, 'index'])
+        ->name('orders.index');
+    Route::get('/pesanan-saya/{order}', [OrderController::class, 'show'])
+        ->name('orders.show');
+    Route::post('/pesanan/{order}/approve', [OrderController::class, 'approve'])
+        ->name('orders.approve');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {

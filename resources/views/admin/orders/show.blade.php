@@ -159,7 +159,7 @@
 
             {{-- Upload File Desain --}}
             @php
-                $allowedStatus = ['Sedang Dikerjakan', 'Revisi'];
+                $allowedStatus = ['Sedang Dikerjakan', 'Revisi', 'Disetujui Pelanggan'];
                 $revisiCount = $order->orderFiles()->where('tipe_file', 'Revisi')->count();
                 $hasFinal = $order->orderFiles()->where('tipe_file', 'Final')->exists();
             @endphp

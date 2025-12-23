@@ -16,7 +16,7 @@
             </p>
         </div>
 
-        {{-- STATUS --}}
+        {{-- STATUS (REAL-TIME AREA) --}}
         <div x-data="{
             init() {
                 // Refresh status setiap 3 detik (lebih cepat karena ini halaman detail)
@@ -25,11 +25,16 @@
                 }, 3000);
             },
             refreshStatus() {
-                fetch('{{ route('orders.status-html', $order->order_id) }}')
-                    .then(response => response.text())
+                // Gunakan timestamp ?t= agar tidak kena cache browser
+                fetch('{{ route('orders.status-html', $order->order_id) }}?t=' + new Date().getTime())
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.text();
+                    })
                     .then(html => {
                         $refs.statusBadge.innerHTML = html;
-                    });
+                    })
+                    .catch(error => console.error('Error fetching status:', error));
             }
         }" x-init="init()">
             
@@ -39,6 +44,7 @@
                     $activeInvoice = $order->invoices->sortByDesc('created_at')->first();
                     $paymentDeadline = $activeInvoice ? $activeInvoice->created_at->copy()->addHours(24) : null;
                     
+                    // Logika Alert sesuai Controller
                     $showPaymentAlert = $activeInvoice
                         && $activeInvoice->jenis_invoice === 'DP'
                         && in_array($activeInvoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak']);
@@ -216,16 +222,21 @@
     {{-- AKSI --}}
     <div class="flex flex-wrap gap-3">
 
-        {{-- BELUM BAYAR --}}
+        {{-- BELUM BAYAR (Tetap gunakan logika PHP standar untuk tombol) --}}
+        @php
+            // Hitung ulang untuk tombol di bawah (agar tidak undefined)
+            $activeInvoiceForButton = $order->invoices->sortByDesc('created_at')->first();
+        @endphp
+
         @if(
             in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
-            && $activeInvoice
-            && in_array($activeInvoice->status_pembayaran, [
+            && $activeInvoiceForButton
+            && in_array($activeInvoiceForButton->status_pembayaran, [
                 'Belum Dibayar',
                 'Pembayaran Ditolak'
             ])
         )
-            <a href="{{ route('invoices.show', $activeInvoice->invoice_id) }}"
+            <a href="{{ route('invoices.show', $activeInvoiceForButton->invoice_id) }}"
             class="px-6 py-3 bg-indigo-600 text-white rounded-xl
                     hover:bg-indigo-700 transition font-bold">
                 Bayar Sekarang

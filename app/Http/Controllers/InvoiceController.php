@@ -20,6 +20,7 @@ class InvoiceController extends Controller
         $invoice->load([
             'order.user',
             'order.designType',
+            'order.paymentMethod',
         ]);
 
         return view('invoices.show', compact(
@@ -127,10 +128,27 @@ class InvoiceController extends Controller
 
     private function handleAutoExpire(Invoice $invoice)
     {
-        if (
-            $invoice->status_pembayaran === 'Belum Dibayar' &&
-            $invoice->created_at->addHours(24)->isPast()
-        ) {
+        // ❗ HANYA DP YANG BISA EXPIRED
+        if ($invoice->jenis_invoice !== 'DP') {
+            return;
+        }
+
+        // ❗ JIKA SUDAH UPLOAD / DIPROSES → STOP
+        if (in_array($invoice->status_pembayaran, [
+            'Menunggu Verifikasi',
+            'Pembayaran Diterima',
+        ])) {
+            return;
+        }
+
+        // ❗ JIKA SUDAH EXPIRED → STOP (ANTI LOOP)
+        if ($invoice->status_pembayaran === 'Pembayaran Expired') {
+            return;
+        }
+
+        // ❗ CEK DEADLINE
+        if ($invoice->created_at->addHours(24)->isPast()) {
+
             $invoice->update([
                 'status_pembayaran' => 'Pembayaran Expired',
             ]);

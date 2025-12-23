@@ -13,9 +13,9 @@ class Order extends Model
         'order_id',
         'user_id',
         'design_type_id',
+        'payment_method_id',
         'deskripsi',
         'referensi_desain',
-        'metode_pembayaran',
         'status_pesanan',
         'deadline',
     ];
@@ -72,5 +72,10 @@ class Order extends Model
     public function invoices()
     {
         return $this->hasMany(Invoice::class, 'order_id', 'order_id');
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id', 'payment_method_id');
     }
 }

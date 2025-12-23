@@ -104,11 +104,61 @@
 
         <div class="flex justify-between font-bold text-lg">
             <span>Total Dibayar</span>
-            <span class="text-blue-600">
+            <span class="text-indigo-600">
                 Rp {{ number_format($invoice->jumlah_bayar, 0, ',', '.') }}
             </span>
         </div>
     </div>
+
+    {{-- METODE PEMBAYARAN --}}
+    @if($invoice->order->paymentMethod)
+    <div class="bg-white rounded-xl shadow p-5 space-y-4">
+        <h2 class="font-semibold text-gray-700">
+            Metode Pembayaran
+        </h2>
+
+        <div class="text-sm text-gray-700 space-y-2">
+            <p class="font-semibold text-slate-900">
+                {{ $invoice->order->paymentMethod->nama_metode }}
+            </p>
+
+            {{-- NOMOR AKUN --}}
+            @if($invoice->order->paymentMethod->nomor_akun)
+                <p>
+                    Nomor:
+                    <span class="font-medium">
+                        {{ $invoice->order->paymentMethod->nomor_akun }}
+                    </span>
+                </p>
+            @endif
+
+            {{-- ATAS NAMA --}}
+            @if($invoice->order->paymentMethod->atas_nama)
+                <p>
+                    Atas Nama:
+                    <span class="font-medium">
+                        {{ $invoice->order->paymentMethod->atas_nama }}
+                    </span>
+                </p>
+            @endif
+        </div>
+
+        {{-- QR CODE --}}
+        @if($invoice->order->paymentMethod->qr_path)
+            <div class="pt-3 text-center">
+                <p class="text-xs text-slate-500 mb-2">
+                    Scan QR berikut untuk melakukan pembayaran
+                </p>
+
+                <img
+                    src="{{ asset('storage/' . $invoice->order->paymentMethod->qr_path) }}"
+                    alt="QR Pembayaran"
+                    class="mx-auto max-w-[220px] rounded-xl border shadow"
+                >
+            </div>
+        @endif
+    </div>
+    @endif
 
     {{-- BUKTI PEMBAYARAN --}}
     <div class="bg-white rounded-xl shadow p-5"
@@ -142,8 +192,8 @@
 
                 <button
                     @click="open = true"
-                    class="mt-4 px-4 py-2 bg-blue-600 text-white
-                        rounded-lg hover:bg-blue-700
+                    class="mt-4 px-4 py-2 bg-indigo-600 text-white
+                        rounded-lg hover:bg-indigo-700
                         transition text-sm font-semibold">
                     Lihat Bukti Pembayaran
                 </button>
@@ -151,7 +201,7 @@
 
             {{-- MODAL --}}
             <div x-show="open" x-cloak x-transition.opacity
-                class="fixed inset-0 z-[100] flex items-center justify-center
+                class="fixed inset-0 z-[100] flex flex-col items-center justify-center
                         bg-gray-900/95 backdrop-blur-sm p-4"
                 @click.self="open = false">
 
@@ -210,9 +260,8 @@
             && auth()->check()
             && auth()->user()->is_admin == 0
             && in_array($invoice->order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
-            && $invoice->status_pembayaran !== 'Pembayaran Diterima'
+            && in_array($invoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak'])
         )
-
             <form
                 action="{{ route('invoices.upload', $invoice->invoice_id) }}"
                 method="POST"

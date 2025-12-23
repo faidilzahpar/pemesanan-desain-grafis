@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\DesignType;
 use App\Models\Invoice;
+use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -57,6 +58,24 @@ class OrderController extends Controller
             'invoices'
         ]);
 
+        $activeInvoice = $order->invoices
+            ->sortByDesc('created_at')
+            ->first();
+
+        $paymentDeadline = $activeInvoice
+            ? $activeInvoice->created_at->copy()->addHours(24)
+            : null;
+
+        $visibleInvoices = $order->invoices
+            ->whereNotNull('bukti_path');
+
+        return view('orders.show', compact(
+            'order',
+            'activeInvoice',
+            'paymentDeadline',
+            'visibleInvoices'
+        ));
+
         return view('orders.show', compact('order'));
     }
 
@@ -68,11 +87,9 @@ class OrderController extends Controller
 
         $selectedDesignId = $request->query('design');
 
-        $paymentMethods = [
-            'Transfer Bank',
-            'E-Wallet',
-            'QRIS',
-        ];
+        $paymentMethods = PaymentMethod::where('is_active', true)
+        ->orderBy('nama_metode')
+        ->get();
 
         return view('orders.create', compact(
             'designTypes',
@@ -86,8 +103,8 @@ class OrderController extends Controller
         $request->validate([
             'design_type_id'     => 'required|exists:design_types,design_type_id',
             'deskripsi'          => 'required|string',
-            'metode_pembayaran' => 'required|string',
-            'referensi_desain'   => 'nullable|file|max:10240', // 10MB
+            'payment_method_id'  => 'required|exists:payment_methods,payment_method_id',
+            'referensi_desain'   => 'nullable|file|max:10240',
         ]);
 
         // Ambil jenis desain
@@ -105,13 +122,13 @@ class OrderController extends Controller
 
         // Simpan order
         $order = Order::create([
-            'user_id'           => Auth::id(),
-            'design_type_id'    => $designType->design_type_id,
-            'deskripsi'         => $request->deskripsi,
-            'referensi_desain'  => $referensiPath,
-            'metode_pembayaran' => $request->metode_pembayaran,
-            'status_pesanan'    => 'Menunggu DP',
-            'deadline'          => null,
+            'user_id'            => Auth::id(),
+            'design_type_id'     => $designType->design_type_id,
+            'payment_method_id'  => $request->payment_method_id,
+            'deskripsi'          => $request->deskripsi,
+            'referensi_desain'   => $referensiPath,
+            'status_pesanan'     => 'Menunggu DP',
+            'deadline'           => null,
         ]);
 
         // Buat invoice DP otomatis

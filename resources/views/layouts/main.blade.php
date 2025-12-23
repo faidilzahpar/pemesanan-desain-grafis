@@ -68,10 +68,16 @@
                     Layanan
                 </a>
 
-                {{-- Portofolio Link (Tetap pakai RouteIs karena biasanya halaman berbeda) --}}
+                {{-- Portofolio Link --}}
                 <a href="{{ route('portfolio') }}" 
                 class="{{ request()->routeIs('portfolio') ? 'text-indigo-600 font-bold' : 'text-slate-600 hover:text-indigo-600' }} transition">
                     Portofolio
+                </a>
+
+                {{-- Portofolio Link --}}
+                <a href="{{ route('orders.index') }}" 
+                class="{{ request()->routeIs('orders.index') ? 'text-indigo-600 font-bold' : 'text-slate-600 hover:text-indigo-600' }} transition">
+                    Pesanan
                 </a>
             </div>
 

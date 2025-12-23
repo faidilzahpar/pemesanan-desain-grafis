@@ -1,13 +1,3 @@
-@php
-    $activeInvoice = $order->invoices
-        ->sortByDesc('created_at')
-        ->first();
-
-    $paymentDeadline = $activeInvoice
-        ? $activeInvoice->created_at->copy()->addHours(24)
-        : null;
-@endphp
-
 @extends('layouts.main')
 
 @section('title', 'Detail Pesanan')
@@ -40,18 +30,38 @@
         @endphp
 
         <div class="flex flex-col items-end gap-1">
+            {{-- STATUS PESANAN --}}
             <span class="px-4 py-2 rounded-full text-sm font-semibold {{ $statusColor }}">
                 {{ $order->status_pesanan }}
             </span>
 
+            {{-- STATUS PEMBAYARAN --}}
+            @if($activeInvoice)
+                @php
+                    $paymentColor = match($activeInvoice->status_pembayaran) {
+                        'Belum Dibayar'        => 'text-red-600',
+                        'Pembayaran Ditolak'  => 'text-red-600',
+                        'Menunggu Verifikasi' => 'text-yellow-600',
+                        'Pembayaran Diterima' => 'text-green-600',
+                        'Pembayaran Expired'  => 'text-gray-500',
+                        default               => 'text-gray-500',
+                    };
+                @endphp
+
+                <span class="text-xs font-semibold {{ $paymentColor }}">
+                    Status Pembayaran: {{ $activeInvoice->status_pembayaran }}
+                </span>
+            @endif
+
             {{-- DEADLINE BAYAR --}}
             @if(
-                in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
+                $activeInvoice
+                && in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
+                && in_array($activeInvoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak'])
                 && $paymentDeadline
             )
                 <span class="text-xs text-red-600 font-semibold">
-                    Bayar sebelum
-                    {{ $paymentDeadline->translatedFormat('d F Y, H:i') }}
+                    Bayar sebelum {{ $paymentDeadline->translatedFormat('d F Y, H:i') }}
                 </span>
             @endif
         </div>
@@ -65,10 +75,16 @@
         </p>
 
         <p>
+            <span class="font-semibold">Total:</span>
+            Rp {{ number_format($order->designType->harga, 0, ',', '.') }}
+        </p>
+        
+        <p>
             <span class="font-semibold">Metode Pembayaran:</span>
-            {{ $order->metode_pembayaran }}
+            {{ $order->paymentMethod->nama_metode}}
         </p>
 
+        
         <p>
             <span class="font-semibold">Tanggal Pesan:</span>
             {{ $order->created_at->translatedFormat('d F Y, H:i') }}
@@ -191,24 +207,20 @@
     @endif
 
     {{-- INVOICE --}}
-    @if($order->invoices->count())
+    @if($visibleInvoices->isNotEmpty())
     <div class="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
-        <h2 class="text-lg font-bold text-slate-900">
-            Invoice
-        </h2>
+        <h2 class="text-lg font-bold text-slate-900">Invoice</h2>
 
         <div class="flex flex-wrap gap-3">
-            @foreach($order->invoices as $invoice)
-                @if($invoice->bukti_path)
-                    <a href="{{ route('invoices.show', $invoice->invoice_id) }}"
-                    class="px-4 py-2 rounded-lg text-sm font-semibold transition
-                            {{ $invoice->jenis_invoice === 'DP'
-                                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                            }}">
-                        Lihat Invoice {{ $invoice->jenis_invoice }}
-                    </a>
-                @endif
+            @foreach($visibleInvoices as $invoice)
+                <a href="{{ route('invoices.show', $invoice->invoice_id) }}"
+                class="px-4 py-2 rounded-lg text-sm font-semibold
+                        {{ $invoice->jenis_invoice === 'DP'
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        }}">
+                    Lihat Invoice {{ $invoice->jenis_invoice }}
+                </a>
             @endforeach
         </div>
     </div>
@@ -218,13 +230,21 @@
     <div class="flex flex-wrap gap-3">
 
         {{-- BELUM BAYAR --}}
-        @if(in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan']) && $order->invoices->first())
-            <a href="{{ route('invoices.show', $order->invoices->first()->invoice_id) }}"
+        @if(
+            in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
+            && $activeInvoice
+            && in_array($activeInvoice->status_pembayaran, [
+                'Belum Dibayar',
+                'Pembayaran Ditolak'
+            ])
+        )
+            <a href="{{ route('invoices.show', $activeInvoice->invoice_id) }}"
             class="px-6 py-3 bg-indigo-600 text-white rounded-xl
                     hover:bg-indigo-700 transition font-bold">
                 Bayar Sekarang
             </a>
         @endif
+
 
         {{-- AJUKAN REVISI --}}
         @if(in_array($order->status_pesanan, [

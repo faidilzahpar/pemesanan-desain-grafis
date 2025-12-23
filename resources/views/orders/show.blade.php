@@ -17,53 +17,40 @@
         </div>
 
         {{-- STATUS --}}
-        @php
-            $statusColor = match($order->status_pesanan) {
-                'Menunggu DP', 'Menunggu Pelunasan' => 'bg-red-100 text-red-700',
-                'Sedang Dikerjakan' => 'bg-yellow-100 text-yellow-700',
-                'Menunggu Konfirmasi Pelanggan' => 'bg-blue-100 text-blue-700',
-                'Revisi' => 'bg-purple-100 text-purple-700',
-                'Selesai' => 'bg-green-100 text-green-700',
-                'Dibatalkan' => 'bg-gray-200 text-gray-600',
-                default => 'bg-gray-100 text-gray-600',
-            };
-        @endphp
-
-        <div class="flex flex-col items-end gap-1">
-            {{-- STATUS PESANAN --}}
-            <span class="px-4 py-2 rounded-full text-sm font-semibold {{ $statusColor }}">
-                {{ $order->status_pesanan }}
-            </span>
-
-            {{-- STATUS PEMBAYARAN --}}
-            @if($activeInvoice)
+        <div x-data="{
+            init() {
+                // Refresh status setiap 3 detik (lebih cepat karena ini halaman detail)
+                setInterval(() => {
+                    this.refreshStatus();
+                }, 3000);
+            },
+            refreshStatus() {
+                fetch('{{ route('orders.status-html', $order->order_id) }}')
+                    .then(response => response.text())
+                    .then(html => {
+                        $refs.statusBadge.innerHTML = html;
+                    });
+            }
+        }" x-init="init()">
+            
+            <div x-ref="statusBadge">
+                {{-- Hitung ulang variabel untuk include pertama kali --}}
                 @php
-                    $paymentColor = match($activeInvoice->status_pembayaran) {
-                        'Belum Dibayar'        => 'text-red-600',
-                        'Pembayaran Ditolak'  => 'text-red-600',
-                        'Menunggu Verifikasi' => 'text-yellow-600',
-                        'Pembayaran Diterima' => 'text-green-600',
-                        'Pembayaran Expired'  => 'text-gray-500',
-                        default               => 'text-gray-500',
-                    };
+                    $activeInvoice = $order->invoices->sortByDesc('created_at')->first();
+                    $paymentDeadline = $activeInvoice ? $activeInvoice->created_at->copy()->addHours(24) : null;
+                    
+                    $showPaymentAlert = $activeInvoice
+                        && $activeInvoice->jenis_invoice === 'DP'
+                        && in_array($activeInvoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak']);
                 @endphp
 
-                <span class="text-xs font-semibold {{ $paymentColor }}">
-                    Status Pembayaran: {{ $activeInvoice->status_pembayaran }}
-                </span>
-            @endif
-
-            {{-- DEADLINE BAYAR (HANYA DP) --}}
-            @if(
-                $activeInvoice
-                && $activeInvoice->jenis_invoice === 'DP'
-                && in_array($activeInvoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak'])
-                && $paymentDeadline
-            )
-                <span class="text-xs text-red-600 font-semibold">
-                    Bayar sebelum {{ $paymentDeadline->translatedFormat('d F Y, H:i') }}
-                </span>
-            @endif
+                @include('orders.partials.status-badge', [
+                    'order' => $order,
+                    'activeInvoice' => $activeInvoice,
+                    'paymentDeadline' => $paymentDeadline,
+                    'showPaymentAlert' => $showPaymentAlert
+                ])
+            </div>
         </div>
     </div>
 

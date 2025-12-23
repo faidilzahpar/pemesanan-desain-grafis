@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
         ->name('orders.show');
     Route::post('/pesanan/{order}/approve', [OrderController::class, 'approve'])
         ->name('orders.approve');
+    Route::get('/orders/{order}/status-html', [OrderController::class, 'getStatusHtml'])
+        ->name('orders.status-html');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {

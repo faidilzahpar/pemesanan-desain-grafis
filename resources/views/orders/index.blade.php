@@ -43,21 +43,14 @@
         @foreach($orders as $order)
 
         @php
-            $activeInvoice = $order->invoices
-                ->sortByDesc('created_at')
-                ->first();
-
+            $activeInvoice = $order->invoices->sortByDesc('created_at')->first();
             $paymentDeadline = $activeInvoice
                 ? $activeInvoice->created_at->copy()->addHours(24)
                 : null;
-
             $showPaymentAlert =
                 $activeInvoice
-                && in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
-                && in_array($activeInvoice->status_pembayaran, [
-                    'Belum Dibayar',
-                    'Pembayaran Ditolak'
-                ]);
+                && $activeInvoice->jenis_invoice === 'DP'
+                && in_array($activeInvoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak']);
         @endphp
 
         <div class="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
@@ -74,30 +67,35 @@
                 </div>
 
                 {{-- STATUS --}}
-                @php
-                    $statusColor = match($order->status_pesanan) {
-                        'Menunggu DP', 'Menunggu Pelunasan' => 'bg-red-100 text-red-700',
-                        'Sedang Dikerjakan' => 'bg-yellow-100 text-yellow-700',
-                        'Menunggu Konfirmasi Pelanggan' => 'bg-blue-100 text-blue-700',
-                        'Revisi' => 'bg-purple-100 text-purple-700',
-                        'Selesai' => 'bg-green-100 text-green-700',
-                        'Dibatalkan' => 'bg-gray-200 text-gray-600',
-                        default => 'bg-gray-100 text-gray-600',
-                    };
-                @endphp
-
-                <div class="flex flex-col items-end text-right gap-1">
-                    {{-- STATUS PESANAN --}}
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusColor }}">
-                        {{ $order->status_pesanan }}
-                    </span>
-
-                    {{-- ALERT PEMBAYARAN --}}
-                    @if($showPaymentAlert && $paymentDeadline)
-                        <span class="text-xs text-red-600 font-semibold">
-                            {{ $activeInvoice->status_pembayaran }}: Bayar sebelum {{ $paymentDeadline->translatedFormat('d F Y, H:i') }}
-                        </span>
-                    @endif
+                <div x-data="{
+                    init() {
+                        // Refresh status setiap 5 detik agar tidak terlalu membebani server
+                        setInterval(() => {
+                            this.refreshStatus();
+                        }, 5000);
+                    },
+                    refreshStatus() {
+                        fetch('{{ route('orders.status-html', $order->order_id) }}?t=' + new Date().getTime())
+                            .then(response => {
+                                if (!response.ok) throw new Error('Network response was not ok');
+                                return response.text();
+                            })
+                            .then(html => {
+                                $refs.statusContainer.innerHTML = html;
+                            })
+                            .catch(error => console.error('Error fetching status:', error));
+                    }
+                }" x-init="init()">
+                    
+                    <div x-ref="statusContainer">
+                        {{-- Panggil partial view untuk tampilan awal --}}
+                        @include('orders.partials.status-badge', [
+                            'order' => $order,
+                            'activeInvoice' => $activeInvoice,
+                            'paymentDeadline' => $paymentDeadline,
+                            'showPaymentAlert' => $showPaymentAlert
+                        ])
+                    </div>
                 </div>
             </div>
 
@@ -136,10 +134,18 @@
             <div class="flex flex-wrap items-center gap-3 pt-2">
 
                 {{-- BAYAR SEKARANG --}}
-                @if($showPaymentAlert)
+                {{-- BELUM BAYAR --}}
+                @if(
+                    in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
+                    && $activeInvoice
+                    && in_array($activeInvoice->status_pembayaran, [
+                        'Belum Dibayar',
+                        'Pembayaran Ditolak'
+                    ])
+                )
                     <a href="{{ route('invoices.show', $activeInvoice->invoice_id) }}"
-                    class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold
-                            hover:bg-indigo-700 transition shadow-sm">
+                    class="px-6 py-3 bg-indigo-600 text-white rounded-xl
+                            hover:bg-indigo-700 transition font-bold">
                         Bayar Sekarang
                     </a>
                 @endif

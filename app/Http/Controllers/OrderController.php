@@ -186,4 +186,37 @@ class OrderController extends Controller
             ->route('invoices.show', $invoice->invoice_id)
             ->with('success', 'Desain disetujui. Silakan lakukan pelunasan.');
     }
+
+    public function getStatusHtml(Order $order)
+    {
+        // 1. Cek Authorisasi
+        if (Auth::id() !== $order->user_id && !Auth::user()->is_admin) {
+            abort(403);
+        }
+
+        // 2. Load ulang relasi Invoice
+        $order->load('invoices'); 
+
+        // 3. Ambil Invoice Terakhir
+        $activeInvoice = $order->invoices->sortByDesc('created_at')->first();
+        
+        // 4. Hitung Deadline
+        $paymentDeadline = $activeInvoice 
+            ? $activeInvoice->created_at->copy()->addHours(24) 
+            : null;
+
+        // 5. HITUNG ULANG showPaymentAlert (INI YANG TADI HILANG)
+        $showPaymentAlert = 
+            $activeInvoice
+            && $activeInvoice->jenis_invoice === 'DP'
+            && in_array($activeInvoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak']);
+
+        // 6. Kirim SEMUA variabel ke partial view
+        return view('orders.partials.status-badge', compact(
+            'order', 
+            'activeInvoice', 
+            'paymentDeadline',
+            'showPaymentAlert'
+        ))->render();
+    }
 }

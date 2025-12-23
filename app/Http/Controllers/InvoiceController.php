@@ -10,6 +10,21 @@ class InvoiceController extends Controller
 {
     public function show(Invoice $invoice)
     {
+        // Pastikan user sudah login
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $user = Auth::user();
+
+        // Ambil data order untuk cek user_id
+        $ownerId = $invoice->order->user_id;
+
+        // Jika User BUKAN Admin DAN User BUKAN Pemilik Invoice -> Tolak
+        if ($user->is_admin !== 1 && $user->id !== $ownerId) {
+            abort(403);
+        }
+
         $this->handleAutoExpire($invoice);
 
         if ($invoice->wasChanged()) {
@@ -99,6 +114,10 @@ class InvoiceController extends Controller
     public function upload(Request $request, Invoice $invoice)
     {
         abort_if(!Auth::check() || Auth::user()->is_admin == 1, 403);
+
+        if ($invoice->order->user_id !== Auth::id()) {
+            abort(403);
+        }
 
         // ❗ CEK EXPIRED
         if ($invoice->status_pembayaran === 'Pembayaran Expired') {

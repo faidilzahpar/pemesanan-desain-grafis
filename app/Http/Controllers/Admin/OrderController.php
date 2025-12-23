@@ -14,7 +14,6 @@ class OrderController extends Controller
         // STATUS YANG TIDAK DITAMPILKAN
         $excludedStatus = [
             'Menunggu DP',
-            'Menunggu Pelunasan',
             'Selesai',
             'Dibatalkan',
         ];

@@ -159,15 +159,31 @@ class OrderController extends Controller
             return back()->with('error', 'Belum ada file desain untuk disetujui.');
         }
 
-        // Update status → menunggu pelunasan
+        // ❗ CEK: jangan buat invoice pelunasan dobel
+        $alreadyHasPelunasan = $order->invoices()
+            ->where('jenis_invoice', 'Pelunasan')
+            ->exists();
+
+        if ($alreadyHasPelunasan) {
+            return back()->with('error', 'Invoice pelunasan sudah tersedia.');
+        }
+
+        // Update status order
         $order->update([
             'status_pesanan' => 'Menunggu Pelunasan',
         ]);
 
-        // (opsional, nanti) buat invoice pelunasan di sini
+        // ✅ BUAT INVOICE PELUNASAN
+        $invoice = Invoice::create([
+            'order_id'          => $order->order_id,
+            'jenis_invoice'     => 'Pelunasan',
+            'status_pembayaran' => 'Belum Dibayar',
+            'tgl_bayar'         => null,
+            'bukti_path'        => null,
+        ]);
 
         return redirect()
-            ->route('orders.show', $order->order_id)
+            ->route('invoices.show', $invoice->invoice_id)
             ->with('success', 'Desain disetujui. Silakan lakukan pelunasan.');
     }
 }

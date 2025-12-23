@@ -53,10 +53,10 @@
                 </span>
             @endif
 
-            {{-- DEADLINE BAYAR --}}
+            {{-- DEADLINE BAYAR (HANYA DP) --}}
             @if(
                 $activeInvoice
-                && in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
+                && $activeInvoice->jenis_invoice === 'DP'
                 && in_array($activeInvoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak'])
                 && $paymentDeadline
             )

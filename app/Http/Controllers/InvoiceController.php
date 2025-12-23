@@ -12,10 +12,13 @@ class InvoiceController extends Controller
     {
         $this->handleAutoExpire($invoice);
 
+        if ($invoice->wasChanged()) {
+             $invoice->refresh();
+        }
+
         $paymentDeadline = $invoice->created_at->copy()->addHours(24);
 
-        $isExpired =
-            $invoice->status_pembayaran === 'Pembayaran Expired';
+        $isExpired = $invoice->status_pembayaran === 'Pembayaran Expired';
 
         $invoice->load([
             'order.user',
@@ -128,27 +131,23 @@ class InvoiceController extends Controller
 
     private function handleAutoExpire(Invoice $invoice)
     {
-        // ❗ HANYA DP YANG BISA EXPIRED
+        // Hanya invoice DP
         if ($invoice->jenis_invoice !== 'DP') {
             return;
         }
 
-        // ❗ JIKA SUDAH UPLOAD / DIPROSES → STOP
+        // Status yang tidak boleh di-expire
         if (in_array($invoice->status_pembayaran, [
             'Menunggu Verifikasi',
             'Pembayaran Diterima',
+            'Pembayaran Expired',
         ])) {
             return;
         }
 
-        // ❗ JIKA SUDAH EXPIRED → STOP (ANTI LOOP)
-        if ($invoice->status_pembayaran === 'Pembayaran Expired') {
-            return;
-        }
+        $deadline = $invoice->created_at->copy()->addHours(24);
 
-        // ❗ CEK DEADLINE
-        if ($invoice->created_at->addHours(24)->isPast()) {
-
+        if ($deadline->isPast()) {
             $invoice->update([
                 'status_pembayaran' => 'Pembayaran Expired',
             ]);

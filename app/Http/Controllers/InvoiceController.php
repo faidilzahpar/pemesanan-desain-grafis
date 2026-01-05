@@ -18,10 +18,9 @@ class InvoiceController extends Controller
         $user = Auth::user();
 
         // Ambil data order untuk cek user_id
-        $ownerId = $invoice->order->user_id;
-
+        $ownerId = $invoice->order->user_id;    
         // Jika User BUKAN Admin DAN User BUKAN Pemilik Invoice -> Tolak
-        if ($user->is_admin !== 1 && $user->id !== $ownerId) {
+        if ($user->is_admin != 1 && $user->user_id != $ownerId) {
             abort(403);
         }
 

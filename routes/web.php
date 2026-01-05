@@ -33,19 +33,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // Invoices & Orders
-    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
-    Route::post('/invoices/{invoice}/verify', [InvoiceController::class, 'verify'])->name('invoices.verify');
-    Route::post('/invoices/{invoice}/reject', [InvoiceController::class, 'reject'])->name('invoices.reject');
-    Route::post('/invoices/{invoice}/upload', [InvoiceController::class, 'upload'])->name('invoices.upload');
-    
-    Route::get('/order', [OrderController::class, 'create'])->name('orders.create');
-    Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
-    Route::get('/pesanan-saya', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/pesanan-saya/{order}', [OrderController::class, 'show'])->name('orders.show');
-    Route::post('/pesanan/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
-    Route::get('/orders/{order}/status-html', [OrderController::class, 'getStatusHtml'])->name('orders.status-html');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])
+        ->name('invoices.show');
+    Route::post('/invoices/{invoice}/verify', [InvoiceController::class, 'verify'])
+        ->name('invoices.verify');
+    Route::post('/invoices/{invoice}/reject', [InvoiceController::class, 'reject'])
+        ->name('invoices.reject');
+    Route::get('/order', [OrderController::class, 'create'])
+        ->name('orders.create');
+    Route::post('/order', [OrderController::class, 'store'])
+        ->name('orders.store');
+    Route::post('/invoices/{invoice}/upload', [InvoiceController::class, 'upload'])
+        ->name('invoices.upload');
+    Route::get('/pesanan-saya', [OrderController::class, 'index'])
+        ->name('orders.index');
+    Route::get('/pesanan-saya/{order}', [OrderController::class, 'show'])
+        ->name('orders.show');
+    Route::post('/pesanan/{order}/approve', [OrderController::class, 'approve'])
+        ->name('orders.approve');
+    Route::get('/orders/{order}/status-html', [OrderController::class, 'getStatusHtml'])
+        ->name('orders.status-html');
+    Route::get('/orders/file/{file}/download', [OrderController::class, 'downloadFile'])
+        ->name('orders.file.download');
 });
 
 /*

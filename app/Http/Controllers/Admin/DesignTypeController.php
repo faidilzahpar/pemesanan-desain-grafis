@@ -11,10 +11,38 @@ class DesignTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $types = DesignType::orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = DesignType::query();
+
+        // 1. LOGIKA SEARCH
+        // (Search meliputi: Nama Jenis, Harga, Durasi, Deskripsi. Status tidak termasuk)
+        if ($request->filled('tableSearch')) {
+            $search = $request->tableSearch;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_jenis', 'like', "%{$search}%")
+                ->orWhere('harga', 'like', "%{$search}%")
+                ->orWhere('durasi', 'like', "%{$search}%")
+                ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. LOGIKA SORTING
+        if ($request->filled('tableSortColumn') && $request->filled('tableSortDirection')) {
+            $column = $request->tableSortColumn;
+            $direction = $request->tableSortDirection === 'desc' ? 'desc' : 'asc';
+
+            // Validasi kolom agar aman (sesuai nama kolom di DB)
+            $validColumns = ['nama_jenis', 'harga', 'durasi', 'is_active'];
+
+            if (in_array($column, $validColumns)) {
+                $query->orderBy($column, $direction);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $types = $query->paginate(10)->withQueryString();
 
         return view('admin.design-types.index', compact('types'));
     }
@@ -40,7 +68,6 @@ class DesignTypeController extends Controller
         ]);
 
         DesignType::create([
-            // design_type_id dibuat otomatis oleh model melalui boot()
             'nama_jenis' => $request->nama_jenis,
             'deskripsi' => $request->deskripsi,
             'durasi' => $request->durasi,

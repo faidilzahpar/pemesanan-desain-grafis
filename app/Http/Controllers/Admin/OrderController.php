@@ -11,31 +11,113 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // STATUS YANG TIDAK DITAMPILKAN
-        $excludedStatus = [
-            'Menunggu DP',
-            'Selesai',
-            'Dibatalkan',
-        ];
+        $excludedStatus = ['Menunggu DP', 'Selesai', 'Dibatalkan'];
 
-        // AMBIL PESANAN YANG SEDANG DIKERJAKAN
-        $orders = Order::with('user', 'designType')
-            ->whereNotIn('status_pesanan', $excludedStatus)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Order::with('user', 'designType')
+            ->whereNotIn('status_pesanan', $excludedStatus);
+
+        // 1. LOGIKA SEARCH UPDATE
+        if ($request->filled('tableSearch')) {
+            $search = $request->tableSearch;
+            $query->where(function($q) use ($search) {
+                $q->where('order_id', 'like', "%{$search}%")
+                  ->orWhere('status_pesanan', 'like', "%{$search}%") // Tambah Status
+                  ->orWhereHas('user', function($u) use ($search) {
+                      $u->where('name', 'like', "%{$search}%")
+                        ->orWhere('no_hp', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('designType', function($d) use ($search) { // Tambah Jenis Desain
+                      $d->where('nama_jenis', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // 2. LOGIKA SORTING
+        if ($request->filled('tableSortColumn') && $request->filled('tableSortDirection')) {
+            $column = $request->tableSortColumn;
+            $direction = $request->tableSortDirection === 'desc' ? 'desc' : 'asc';
+
+            if ($column === 'user_name') {
+                // Sort Relasi User
+                $query->join('users', 'orders.user_id', '=', 'users.id')
+                      ->orderBy('users.name', $direction)
+                      ->select('orders.*');
+            } 
+            elseif ($column === 'design_type') { 
+                $query->join('design_types', 'orders.design_type_id', '=', 'design_types.design_type_id')
+                      ->orderBy('design_types.nama_jenis', $direction)
+                      ->select('orders.*');
+            } 
+            else {
+                // Sort Kolom Biasa
+                $query->orderBy($column, $direction);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $orders = $query->paginate(10)->withQueryString();
 
         return view('admin.orders.index', compact('orders'));
     }
 
-    public function history()
+    public function history(Request $request)
     {
-        // Ambil hanya pesanan yang statusnya SELESAI atau DIBATALKAN
-        $orders = Order::with('user', 'designType')
-            ->whereIn('status_pesanan', ['Selesai', 'Dibatalkan'])
-            ->orderBy('updated_at', 'desc') // Urutkan berdasarkan terakhir diupdate (selesai)
-            ->paginate(10);
+        // Filter hanya status Selesai & Dibatalkan
+        $query = Order::with('user', 'designType')
+            ->whereIn('status_pesanan', ['Selesai', 'Dibatalkan']);
+
+        // 1. LOGIKA SEARCH
+        if ($request->filled('tableSearch')) {
+            $search = $request->tableSearch;
+            $query->where(function($q) use ($search) {
+                $q->where('order_id', 'like', "%{$search}%")
+                ->orWhere('status_pesanan', 'like', "%{$search}%")
+                ->orWhereHas('user', function($u) use ($search) {
+                    $u->where('name', 'like', "%{$search}%")
+                        ->orWhere('no_hp', 'like', "%{$search}%");
+                })
+                ->orWhereHas('designType', function($d) use ($search) {
+                    $d->where('nama_jenis', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // 2. LOGIKA SORTING
+        if ($request->filled('tableSortColumn') && $request->filled('tableSortDirection')) {
+            $column = $request->tableSortColumn;
+            $direction = $request->tableSortDirection === 'desc' ? 'desc' : 'asc';
+
+            if ($column === 'user_name') {
+                // Sort Relasi User
+                $query->join('users', 'orders.user_id', '=', 'users.user_id')
+                    ->orderBy('users.name', $direction)
+                    ->select('orders.*');
+            } 
+            elseif ($column === 'design_type') { 
+                // Sort Relasi Jenis Desain
+                $query->join('design_types', 'orders.design_type_id', '=', 'design_types.design_type_id')
+                    ->orderBy('design_types.nama_jenis', $direction)
+                    ->select('orders.*');
+            }
+            elseif ($column === 'total') {
+                // Sort Relasi Harga (Total)
+                $query->join('design_types', 'orders.design_type_id', '=', 'design_types.design_type_id')
+                    ->orderBy('design_types.harga', $direction)
+                    ->select('orders.*');
+            }
+            else {
+                // Sort Kolom Biasa (order_id, updated_at/tgl_selesai, status_pesanan)
+                $query->orderBy($column, $direction);
+            }
+        } else {
+            // Default sort: Tgl Selesai terbaru
+            $query->orderBy('updated_at', 'desc');
+        }
+
+        $orders = $query->paginate(10)->withQueryString();
 
         return view('admin.orders.history', compact('orders'));
     }

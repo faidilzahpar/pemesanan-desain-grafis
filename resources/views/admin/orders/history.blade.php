@@ -1,28 +1,28 @@
 @extends('layouts.admin')
 
-@section('title', 'Pesanan Sedang Dikerjakan')
+@section('title', 'Riwayat Pesanan')
 
 @section('content')
-{{-- HEADER: Judul & Tombol Riwayat --}}
+{{-- HEADER: Judul & Tombol Kembali --}}
 <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
     <h1 class="text-3xl font-bold text-gray-800">
-        Pesanan Sedang Dikerjakan
+        Riwayat Pesanan
     </h1>
 
-    <a href="{{ route('admin.orders.history') }}" 
+    <a href="{{ route('admin.orders.index') }}" 
        class="px-5 py-2 bg-blue-600 text-white font-medium rounded-lg 
               hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Lihat Riwayat
+        Pesanan Aktif
     </a>
 </div>
 
 @if ($orders->count() === 0)
 
     <p class="text-gray-500 text-center py-10">
-        Tidak ada pesanan yang sedang dikerjakan.
+        Belum ada riwayat pesanan (Selesai / Dibatalkan).
     </p>
 
 @else
@@ -33,8 +33,9 @@
                     <th class="py-3 px-6 font-bold border-r border-blue-700">ID Pesanan</th>
                     <th class="py-3 px-6 font-bold border-r border-blue-700">Customer</th>
                     <th class="py-3 px-6 font-bold border-r border-blue-700">No HP</th>
-                    <th class="py-3 px-6 font-bold border-r border-blue-700">Deadline</th>
+                    <th class="py-3 px-6 font-bold border-r border-blue-700">Tgl Selesai</th>
                     <th class="py-3 px-6 font-bold border-r border-blue-700">Jenis Desain</th>
+                    <th class="py-3 px-6 font-bold border-r border-blue-700">Total</th>
                     <th class="py-3 px-6 font-bold border-r border-blue-700">Status</th>
                     <th class="py-3 px-6 font-bold text-center">Aksi</th>
                 </tr>
@@ -53,10 +54,13 @@
                         {{ $order->user->no_hp }}
                     </td>
                     <td class="py-4 px-6 font-medium text-gray-900 border-r border-gray-300">
-                        {{ $order->deadline->translatedFormat('d M Y') }}
+                        {{ $order->updated_at->translatedFormat('d M Y') }}
                     </td>
                     <td class="py-4 px-6 font-medium text-gray-900 border-r border-gray-300">
                         {{ $order->designType->nama_jenis }}
+                    </td>
+                    <td class="py-4 px-6 font-medium text-gray-900 border-r border-gray-300">
+                        Rp {{ number_format($order->designType->harga, 0, ',', '.') }}
                     </td>
                     <td class="py-4 px-6 font-medium text-gray-900 border-r border-gray-300">
                         {{ $order->status_pesanan }}

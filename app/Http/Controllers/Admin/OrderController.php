@@ -29,6 +29,17 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders'));
     }
 
+    public function history()
+    {
+        // Ambil hanya pesanan yang statusnya SELESAI atau DIBATALKAN
+        $orders = Order::with('user', 'designType')
+            ->whereIn('status_pesanan', ['Selesai', 'Dibatalkan'])
+            ->orderBy('updated_at', 'desc') // Urutkan berdasarkan terakhir diupdate (selesai)
+            ->paginate(10);
+
+        return view('admin.orders.history', compact('orders'));
+    }
+
     public function show(Order $order)
     {
         $order->load('user', 'designType', 'orderFiles');

@@ -4,13 +4,14 @@
 @section('content')
 
 {{-- Header --}}
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">
+<div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+    <h1 class="text-3xl font-bold text-gray-800">
         Kelola Jenis Desain
     </h1>
 
     <a href="{{ route('design-types.create') }}"
-       class="mt-4 sm:mt-0 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-blue-500/50 transition">
+       class="px-5 py-2 bg-blue-600 text-white font-medium rounded-lg 
+              hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
         + Tambah Jenis Desain
     </a>
 </div>
@@ -40,7 +41,7 @@
                     </td>
 
                     <td class="py-4 px-6 font-medium text-gray-900 border-r border-gray-300">
-                        Rp{{ number_format($item->harga, 0, ',', '.') }}
+                        Rp {{ number_format($item->harga, 0, ',', '.') }}
                     </td>
 
                     <td class="py-4 px-6 font-medium text-gray-900 text-center border-r border-gray-300">

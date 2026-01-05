@@ -64,8 +64,7 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/dashboard/stats', [DashboardController::class, 'getStats'])
-        ->name('admin.dashboard.stats');
+    Route::get('/admin/dashboard/stats', [DashboardController::class, 'getStats'])->name('admin.dashboard.stats');
 
     // Portfolio Management (CRUD)
     Route::resource('portfolios', AdminPortfolio::class)->names([
@@ -80,6 +79,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
     Route::post('/orders/{order}/upload', [AdminOrderController::class, 'uploadFile'])->name('admin.orders.upload');
     Route::get('/orders/check', [AdminOrderController::class, 'check'])->name('admin.orders.check');
+    Route::get('/admin/orders/history', [App\Http\Controllers\Admin\OrderController::class, 'history'])->name('admin.orders.history');
 
     // Payment Management
     Route::get('/payments', [PaymentController::class, 'index'])->name('admin.payments.index');

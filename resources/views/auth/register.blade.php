@@ -27,6 +27,14 @@
         </div>
 
         <div>
+            <label for="no_hp" class="block text-sm font-bold text-slate-700 mb-2">Nomor HP / WhatsApp</label>
+            <input id="no_hp" type="text" name="no_hp" :value="old('no_hp')" required
+                class="w-full px-5 py-3.5 rounded-2xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50/50 transition-all"
+                placeholder="Contoh: 08123456789">
+            <x-input-error :messages="$errors->get('no_hp')" class="mt-2" />
+        </div>
+
+        <div>
             <label for="password" class="block text-sm font-bold text-slate-700 mb-2">Password</label>
             <input id="password" type="password" name="password" required autocomplete="new-password"
                 class="w-full px-5 py-3.5 rounded-2xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50/50 transition-all"

@@ -20,6 +20,20 @@
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
         </div>
 
+        <div class="mt-6">
+            <label for="no_hp" class="block text-sm font-bold text-slate-700 mb-2">
+                {{ __('Nomor HP / WhatsApp') }}
+            </label>
+    
+            <input id="no_hp" name="no_hp" type="text" 
+                class="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50/50 text-slate-900 font-medium transition-all" 
+                value="{{ old('no_hp', $user->no_hp) }}" 
+                required 
+                autocomplete="tel">
+        
+            <x-input-error class="mt-2" :messages="$errors->get('no_hp')" />
+        </div>
+
         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-10 rounded-2xl shadow-lg shadow-indigo-100 transition-all active:scale-95">
             Simpan Perubahan
         </button>

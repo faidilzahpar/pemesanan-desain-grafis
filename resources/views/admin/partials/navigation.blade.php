@@ -42,6 +42,14 @@
             <span>Jenis Desain</span>
         </a>
 
+        <a href="{{ route('admin.portfolio.index') }}" 
+        class="flex items-center p-3 text-white hover:bg-white/10 rounded-xl transition {{ request()->routeIs('admin.portfolio.*') ? 'bg-white/20 font-bold' : '' }}">
+            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="Drawing-Icon-Path-Sini..."></path>
+            </svg>
+            Portofolio
+        </a>
+
         <a href="{{ route('home') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-500 transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             <span>Halaman Utama</span>

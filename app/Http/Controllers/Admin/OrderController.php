@@ -6,6 +6,8 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class OrderController extends Controller
 {
@@ -37,8 +39,10 @@ class OrderController extends Controller
     public function uploadFile(Request $request, Order $order)
     {
         $request->validate([
-            'file' => 'required|file|max:10240',
+            'file' => 'required|file|max:10240', // Max 10MB
         ]);
+
+        $uploadedFile = $request->file('file'); // Simpan di variabel
 
         $totalFiles  = $order->orderFiles()->count();
         $revisiCount = $order->orderFiles()
@@ -60,8 +64,54 @@ class OrderController extends Controller
             $tipe = 'Final';
         }
 
-        $path = $request->file('file')
-            ->store("order-files/{$order->order_id}", 'public');
+        // --- LOGIKA WATERMARK ---
+        
+        // Cek apakah file adalah gambar
+        $isImage = str_starts_with($uploadedFile->getMimeType(), 'image/');
+        
+        // Path penyimpanan (tanpa nama file dulu)
+        $storagePath = "order-files/{$order->order_id}";
+        
+        // Nama file random hash
+        $filename = $uploadedFile->hashName();
+        $fullPath = $storagePath . '/' . $filename;
+
+        // JIKA BUKAN FINAL & ADALAH GAMBAR => KASIH WATERMARK
+        if ($tipe !== 'Final' && $isImage) {
+            
+            // 1. Setup Image Manager
+            $manager = new ImageManager(new Driver());
+
+            // 2. Baca file yang diupload
+            $image = $manager->read($uploadedFile);
+
+            // 3. Baca watermark (Pastikan file public/watermark.png ADA)
+            if (file_exists(public_path('watermark.png'))) {
+
+
+                // Atau baca langsung
+                $watermark = public_path('watermark.png');
+
+                // 4. Tempel Watermark (Posisi: Center, Opacity: 50%)
+                // Param: (source, position, x, y, opacity)
+                $image->place($watermark, 'center', 0, 0, 50);
+            }
+
+            // 5. Simpan (Encode) kembali ke format aslinya
+            $encoded = $image->toPng(); // atau toJpeg() sesuai kebutuhan, toPng() aman buat transparansi
+
+            // 6. Simpan manual ke Storage Public
+            Storage::disk('public')->put($fullPath, $encoded);
+            
+            // Set path untuk database
+            $path = $fullPath;
+
+        } else {
+            // JIKA FINAL ATAU BUKAN GAMBAR (PDF/ZIP) => SIMPAN BIASA
+            $path = $uploadedFile->store($storagePath, 'public');
+        }
+
+        // --- END LOGIKA WATERMARK ---
 
         $order->orderFiles()->create([
             'tipe_file' => $tipe,

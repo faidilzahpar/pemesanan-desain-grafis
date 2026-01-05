@@ -69,9 +69,11 @@ class InvoiceController extends Controller
             ]);
         }
 
+        // ✅ UPDATE LOGIKA PELUNASAN
         if ($invoice->jenis_invoice === 'Pelunasan') {
             $order->update([
-                'status_pesanan' => 'Selesai',
+                // Ubah status agar Admin & User tahu langkah selanjutnya adalah upload file
+                'status_pesanan' => 'Menunggu File Final', 
             ]);
         }
 

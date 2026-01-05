@@ -39,28 +39,31 @@ class OrderController extends Controller
     public function uploadFile(Request $request, Order $order)
     {
         $request->validate([
-            'file' => 'required|file|max:10240', // Max 10MB
+            'file' => 'required|file|max:10240',
         ]);
 
-        $uploadedFile = $request->file('file'); // Simpan di variabel
+        $uploadedFile = $request->file('file');
 
         $totalFiles  = $order->orderFiles()->count();
         $revisiCount = $order->orderFiles()
             ->where('tipe_file', 'Revisi')
             ->count();
-
-        /*
-        ALUR:
-        1. File pertama  → Preview
-        2. Revisi 1–2    → Revisi
-        3. Revisi ke-3   → Final
-        */
-
-        if ($totalFiles === 0) {
+        
+        // 1. Cek STATUS terlebih dahulu. Jika statusnya 'Menunggu File Final', 
+        // maka file yang diupload PASTI adalah Final, tidak peduli jumlah revisinya.
+        if ($order->status_pesanan === 'Menunggu File Final') {
+            $tipe = 'Final';
+        } 
+        // 2. Jika belum ada file sama sekali -> Preview
+        elseif ($totalFiles === 0) {
             $tipe = 'Preview';
-        } elseif ($revisiCount < 3) {
+        } 
+        // 3. Jika revisi masih kurang dari 3 -> Revisi
+        elseif ($revisiCount < 3) {
             $tipe = 'Revisi';
-        } else {
+        } 
+        // 4. Fallback jika slot revisi habis
+        else {
             $tipe = 'Final';
         }
 

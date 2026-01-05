@@ -118,8 +118,9 @@
             {{-- List File --}}
             <div class="p-6 space-y-3">
                 @forelse($order->orderFiles as $file)
-                    <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition gap-4">
 
+                        {{-- KIRI: Info File --}}
                         <div class="flex items-center space-x-3">
                             <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-purple-500"
@@ -132,6 +133,8 @@
                             <div>
                                 <p class="font-bold text-gray-900">
                                     File {{ $file->tipe_file }}
+                                    @if($file->tipe_file === 'Revisi')
+                                        ({{ $loop->iteration - 1 }}) @endif
                                 </p>
                                 <p class="text-xs text-gray-500 uppercase tracking-widest">
                                     {{ $file->created_at->format('d M Y H:i') }}
@@ -139,13 +142,55 @@
                             </div>
                         </div>
 
-                        <a href="{{ asset('storage/' . $file->path_file) }}"
-                        target="_blank"
-                        class="px-4 py-2 text-sm font-semibold text-blue-600
-                                border border-blue-200 rounded-lg
-                                hover:bg-blue-50 transition">
-                            Lihat File
-                        </a>
+                        {{-- KANAN: Group Tombol (Lihat & Download) --}}
+                        <div x-data="{ open: false }" class="flex gap-2">
+                            
+                            {{-- 1. Tombol Lihat (Membuka Modal) --}}
+                            <button type="button" 
+                                    @click="open = true"
+                                    class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200
+                                        hover:bg-indigo-100 transition text-sm font-semibold flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Lihat
+                            </button>
+
+                            {{-- 2. MODAL PREVIEW --}}
+                            <div x-show="open" 
+                                x-cloak 
+                                x-transition.opacity
+                                style="display: none;"
+                                class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/95 backdrop-blur-sm p-4"
+                                @keydown.escape.window="open = false">
+                                
+                                {{-- Tombol Close (X) --}}
+                                <button @click="open = false" class="absolute top-5 right-5 text-white/70 hover:text-white transition cursor-pointer z-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+
+                                {{-- Klik Background untuk Tutup --}}
+                                <div @click="open = false" class="absolute inset-0 z-0"></div>
+
+                                {{-- Gambar Preview --}}
+                                <img src="{{ asset('storage/' . $file->path_file) }}" 
+                                    class="relative z-10 max-w-full max-h-[85vh] rounded-lg shadow-2xl border border-white/20 bg-white object-contain">
+                            </div>
+
+                            {{-- 3. Tombol Download --}}
+                            {{-- Pastikan route 'orders.file.download' bisa diakses Admin juga, atau buat route khusus admin --}}
+                            <a href="{{ route('orders.file.download', $file->file_id) }}" 
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg
+                                    transition text-sm font-semibold flex items-center gap-2 shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Download
+                            </a>
+                        </div>
 
                     </div>
                 @empty
@@ -159,7 +204,7 @@
 
             {{-- Upload File Desain --}}
             @php
-                $allowedStatus = ['Sedang Dikerjakan', 'Revisi', 'Disetujui Pelanggan'];
+                $allowedStatus = ['Sedang Dikerjakan', 'Revisi', 'Menunggu File Final'];
                 $revisiCount = $order->orderFiles()->where('tipe_file', 'Revisi')->count();
                 $hasFinal = $order->orderFiles()->where('tipe_file', 'Final')->exists();
             @endphp
@@ -334,8 +379,6 @@
                 @endforeach
             </div>
         </div>
-
-
     </div>
 </div>
 

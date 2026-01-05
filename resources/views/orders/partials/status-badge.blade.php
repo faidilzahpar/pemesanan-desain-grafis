@@ -4,6 +4,7 @@
         'Sedang Dikerjakan'                 => 'bg-yellow-100 text-yellow-700',
         'Menunggu Konfirmasi Pelanggan'     => 'bg-blue-100 text-blue-700',
         'Revisi'                            => 'bg-purple-100 text-purple-700',
+        'Menunggu File Final'               => 'bg-teal-100 text-teal-700', 
         'Selesai'                           => 'bg-green-100 text-green-700',
         'Dibatalkan'                        => 'bg-gray-200 text-gray-600',
         default                             => 'bg-gray-100 text-gray-600',

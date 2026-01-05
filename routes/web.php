@@ -52,7 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pesanan/{order}/approve', [OrderController::class, 'approve'])
         ->name('orders.approve');
     Route::get('/orders/{order}/status-html', [OrderController::class, 'getStatusHtml'])
-        ->name('orders.status-html');
+        ->name('orders.status-html'); //real time status
     Route::get('/orders/file/{file}/download', [OrderController::class, 'downloadFile'])
         ->name('orders.file.download');
 });

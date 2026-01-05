@@ -223,33 +223,25 @@ class OrderController extends Controller
 
     public function downloadFile(OrderFile $file)
     {
-        // 1. Cek Login
         if (!Auth::check()) {
             abort(403);
         }
 
-        // 2. Cek Kepemilikan
-        if ($file->order->user_id !== Auth::id()) {
+        $user = Auth::user();
+
+        // IZINKAN JIKA: User adalah pemilik Order ATAU User adalah Admin
+        if ($file->order->user_id !== $user->id && $user->is_admin != 1) {
             abort(403, 'Anda tidak memiliki hak akses untuk file ini.');
         }
 
-        // 3. Cek apakah file ada (menggunakan Storage Facade untuk cek relatif path)
         if (!Storage::disk('public')->exists($file->path_file)) {
             abort(404, 'File tidak ditemukan di server.');
         }
 
-        // --- PERBAIKAN DI SINI ---
-        
-        // Ambil Full Path (Lokasi fisik di harddisk server)
-        // Contoh: D:\laragon\www\project\storage\app\public\order-files\...\hash.png
         $fullPath = Storage::disk('public')->path($file->path_file);
-
-        // Buat nama file yang cantik saat didownload (Opsional)
-        // Agar user tidak mendownload file dengan nama acak (hash)
         $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
         $downloadName = "Desain-{$file->tipe_file}-{$file->order_id}.{$extension}";
 
-        // Gunakan response()->download()
         return response()->download($fullPath, $downloadName);
     }
 }

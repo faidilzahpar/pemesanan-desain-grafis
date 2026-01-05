@@ -64,6 +64,8 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard/stats', [DashboardController::class, 'getStats'])
+        ->name('admin.dashboard.stats');
 
     // Portfolio Management (CRUD)
     Route::resource('portfolios', AdminPortfolio::class)->names([

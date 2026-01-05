@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
         ->name('orders.approve');
     Route::get('/orders/{order}/status-html', [OrderController::class, 'getStatusHtml'])
         ->name('orders.status-html');
+    Route::get('/orders/file/{file}/download', [OrderController::class, 'downloadFile'])
+        ->name('orders.file.download');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\DesignType;
 use App\Models\Invoice;
 use App\Models\PaymentMethod;
+use App\Models\OrderFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -218,5 +219,37 @@ class OrderController extends Controller
             'paymentDeadline',
             'showPaymentAlert'
         ))->render();
+    }
+
+    public function downloadFile(OrderFile $file)
+    {
+        // 1. Cek Login
+        if (!Auth::check()) {
+            abort(403);
+        }
+
+        // 2. Cek Kepemilikan
+        if ($file->order->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk file ini.');
+        }
+
+        // 3. Cek apakah file ada (menggunakan Storage Facade untuk cek relatif path)
+        if (!Storage::disk('public')->exists($file->path_file)) {
+            abort(404, 'File tidak ditemukan di server.');
+        }
+
+        // --- PERBAIKAN DI SINI ---
+        
+        // Ambil Full Path (Lokasi fisik di harddisk server)
+        // Contoh: D:\laragon\www\project\storage\app\public\order-files\...\hash.png
+        $fullPath = Storage::disk('public')->path($file->path_file);
+
+        // Buat nama file yang cantik saat didownload (Opsional)
+        // Agar user tidak mendownload file dengan nama acak (hash)
+        $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+        $downloadName = "Desain-{$file->tipe_file}-{$file->order_id}.{$extension}";
+
+        // Gunakan response()->download()
+        return response()->download($fullPath, $downloadName);
     }
 }

@@ -171,27 +171,70 @@
         @else
             <div class="space-y-3">
                 @foreach($order->orderFiles as $index => $file)
-                    <div class="flex justify-between items-center border rounded-xl p-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border rounded-xl p-4 gap-4">
+                        
+                        {{-- Info File --}}
                         <div>
                             <p class="font-semibold text-slate-800">
                                 {{ $file->tipe_file }}
-
                                 @if($file->tipe_file === 'Revisi')
                                     ({{ $loop->iteration - 1 }})
                                 @endif
                             </p>
-
                             <p class="text-xs text-slate-500">
                                 {{ $file->created_at->translatedFormat('d F Y, H:i') }}
                             </p>
                         </div>
 
-                        <a href="{{ asset('storage/' . $file->path_file) }}"
-                        target="_blank"
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg
-                                hover:bg-indigo-700 transition text-sm font-semibold">
-                            Lihat File
-                        </a>
+                        {{-- Group Tombol --}}
+                        <div x-data="{ open: false }" class="flex gap-2">
+                            {{-- 1. Tombol Lihat (MEMBUKA MODAL) --}}
+                            <button type="button" 
+                                    @click="open = true"
+                                    class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200
+                                        hover:bg-indigo-100 transition text-sm font-semibold flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Lihat
+                            </button>
+
+                            {{-- 2. MODAL (POPUP GAMBAR) --}}
+                            {{-- Gunakan 'template' atau taruh div ini agar tidak mengganggu layout flex, tapi dengan fixed inset-0 aman --}}
+                            <div x-show="open" 
+                                x-cloak 
+                                x-transition.opacity
+                                style="display: none;" {{-- Mencegah flicker saat loading --}}
+                                class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/95 backdrop-blur-sm p-4"
+                                @keydown.escape.window="open = false">
+                                
+                                {{-- Tombol Close (X) di pojok kanan atas --}}
+                                <button @click="open = false" class="absolute top-5 right-5
+                            text-white/70 hover:text-white transition cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+
+                                {{-- Area Klik Luar untuk menutup --}}
+                                <div @click="open = false" class="absolute inset-0 z-0"></div>
+
+                                {{-- Gambar --}}
+                                <img src="{{ asset('storage/' . $file->path_file) }}" 
+                                    class="relative z-10 max-w-full max-h-[85vh] rounded-lg shadow-2xl border border-white/20 bg-white object-contain">
+                            </div>
+
+                            {{-- 3. Tombol Download --}}
+                            <a href="{{ route('orders.file.download', $file->file_id) }}"
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg
+                                    transition text-sm font-semibold flex items-center gap-2 shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Download
+                            </a>
+                        </div>                 
                     </div>
                 @endforeach
             </div>

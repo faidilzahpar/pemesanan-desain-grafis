@@ -230,7 +230,7 @@ class OrderController extends Controller
         $user = Auth::user();
 
         // IZINKAN JIKA: User adalah pemilik Order ATAU User adalah Admin
-        if ($file->order->user_id !== $user->id && $user->is_admin != 1) {
+        if ($file->order->user_id !== $user->user_id && $user->is_admin != 1) {
             abort(403, 'Anda tidak memiliki hak akses untuk file ini.');
         }
 

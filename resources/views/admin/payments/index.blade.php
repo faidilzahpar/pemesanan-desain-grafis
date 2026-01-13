@@ -44,13 +44,29 @@
                     $sortCol = request('tableSortColumn');
                     $sortDir = request('tableSortDirection');
                     
+                    // LOGIKA 3 TAHAP: ASC -> DESC -> DEFAULT (NULL)
                     $getSortUrl = function($col) use ($sortCol, $sortDir) {
-                        $nextDir = ($sortCol === $col && $sortDir === 'asc') ? 'desc' : 'asc';
-                        return request()->fullUrlWithQuery(['tableSortColumn' => $col, 'tableSortDirection' => $nextDir]);
+                        
+                        // 1. Jika kolom beda, atau belum ada sort, mulai dari ASC
+                        if ($sortCol !== $col) {
+                            return request()->fullUrlWithQuery(['tableSortColumn' => $col, 'tableSortDirection' => 'asc']);
+                        }
+                        
+                        // 2. Jika kolom sama dan sedang ASC, ubah jadi DESC
+                        if ($sortDir === 'asc') {
+                            return request()->fullUrlWithQuery(['tableSortColumn' => $col, 'tableSortDirection' => 'desc']);
+                        }
+                        
+                        // 3. Jika kolom sama dan sedang DESC, HAPUS param (kembali ke default)
+                        if ($sortDir === 'desc') {
+                            return request()->fullUrlWithQuery(['tableSortColumn' => null, 'tableSortDirection' => null]);
+                        }
                     };
                     
+                    // Fungsi icon panah (Tidak berubah)
                     $renderIcon = function($col) use ($sortCol, $sortDir) {
-                        if ($sortCol !== $col) return null;
+                        if ($sortCol !== $col) return null; // Tidak ada icon kalau default
+                        
                         return $sortDir === 'asc' 
                             ? '<svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>'
                             : '<svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
@@ -78,9 +94,12 @@
                     </div>
                 </th>
 
-                <th class="py-3 px-6 font-bold border-r border-blue-700">
-                    Tanggal
-                </th>
+                <th class="py-3 px-6 font-bold border-r border-blue-700 cursor-pointer hover:bg-blue-700 transition"
+                        onclick="window.location='{{ $getSortUrl('created_at') }}'">
+                        <div class="flex items-center">
+                            Tanggal {!! $renderIcon('created_at') !!}
+                        </div>
+                    </th>
 
                 <th class="py-3 px-6 font-bold border-r border-blue-700 cursor-pointer hover:bg-blue-700 transition"
                     onclick="window.location='{{ $getSortUrl('jumlah_bayar') }}'">

@@ -3,14 +3,14 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ route('profile.edit') }}">
                         <x-application-logo class="block" />
                     </a>
                 </div>
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="url('/')" :active="request()->is('/')" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-lg font-black tracking-tight text-slate-900 hover:text-indigo-600 hover:border-indigo-400 transition-all duration-300 ease-in-out">
-                        {{ __('Homepage') }}
+                        {{ __('Home') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -70,8 +70,8 @@
 
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+            <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
+                {{ __('Profile') }}
             </x-responsive-nav-link>
 
             @if(Auth::user()->is_admin)

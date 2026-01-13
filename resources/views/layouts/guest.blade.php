@@ -14,7 +14,7 @@
     </head>
     <body class="font-sans text-slate-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-10 pb-10 bg-slate-50/50">
-            <div class="transition-transform hover:scale-105 duration-300 mb-10">
+            <div class="transition-transform hover:scale-105 duration-300 mb-3">
                 <a href="/">
                     <span class="text-3xl font-extrabold tracking-tight text-slate-900">
                         Creative<span class="text-indigo-600">Design</span>

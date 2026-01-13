@@ -1,10 +1,10 @@
 <x-guest-layout>
-    <div class="mb-8 text-center">
+    <div class="mb-2 text-center">
         <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase mb-4 inline-block">
-            Mulai Project Anda
+            Daftar
         </span>
         <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Daftar Akun Baru</h2>
-        <p class="text-slate-500 mt-2">Bergabunglah untuk mendapatkan layanan desain terbaik</p>
+        <p class="text-slate-500 mt-2">Lengkapi data untuk membuat akun</p>
     </div>
 
     <form method="POST" action="{{ route('register') }}" class="space-y-5">
@@ -51,7 +51,7 @@
         </div>
 
         <div class="pt-4">
-            <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all duration-300 flex items-center justify-center gap-2 group">
+            <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-indigo-600 shadow-lg hover:shadow-indigo-200 transition-all duration-300 flex items-center justify-center gap-2 group">
                 Buat Akun Sekarang
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>

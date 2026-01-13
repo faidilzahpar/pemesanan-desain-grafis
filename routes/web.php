@@ -20,15 +20,6 @@ use App\Http\Controllers\OrderController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/portfolio', [PortfolioController::class, 'index'])->name('portfolio');
 
-/*
-|--------------------------------------------------------------------------
-| User Routes (Authenticated)
-|--------------------------------------------------------------------------
-*/
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -63,14 +54,16 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/dashboard/stats', [DashboardController::class, 'getStats'])->name('admin.dashboard.stats');
+    Route::get('/', [DashboardController::class, 'index'])->name('admin');
+    Route::get('/stats', [DashboardController::class, 'getStats'])->name('admin.stats');
 
     // Portfolio Management (CRUD)
     Route::resource('portfolios', AdminPortfolio::class)->names([
         'index'   => 'admin.portfolio.index',
         'create'  => 'admin.portfolio.create',
         'store'   => 'admin.portfolio.store',
+        'edit'    => 'admin.portfolio.edit',
+        'update'  => 'admin.portfolio.update',
         'destroy' => 'admin.portfolio.destroy',
     ]);
 

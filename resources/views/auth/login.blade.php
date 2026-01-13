@@ -1,10 +1,10 @@
 <x-guest-layout>
     <div class="mb-8 text-center">
         <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase mb-4 inline-block">
-            Akses Member
+            Masuk
         </span>
         <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Selamat Datang Kembali</h2>
-        <p class="text-slate-500 mt-2">Masuk untuk mengelola pesanan desain Anda</p>
+        <p class="text-slate-500 mt-2">Silahkan masuk dengan akun yang terdaftar</p>
     </div>
 
     <x-auth-session-status class="mb-4" :status="session('status')" />

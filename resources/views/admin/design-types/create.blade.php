@@ -82,7 +82,7 @@
             {{-- Tombol Submit --}}
             <div class="flex justify-end">
                 <button type="submit"
-                    class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 hover:shadow-blue-500/50 transition duration-300">
+                    class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 hover:shadow-indigo-500/50 transition duration-300">
                     <span>Simpan</span>
                 </button>
             </div>

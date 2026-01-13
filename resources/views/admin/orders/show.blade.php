@@ -8,7 +8,7 @@
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-800">
         Detail Pesanan
-        <span class="text-blue-600">{{ $order->order_id }}</span>
+        <span class="text-indigo-600">{{ $order->order_id }}</span>
     </h1>
 
     <a href="{{ route('admin.orders.index') }}"
@@ -25,7 +25,7 @@
         {{-- Informasi Pesanan --}}
         <div class="bg-white rounded-xl shadow p-6">
             <h2 class="text-lg font-bold text-gray-800 flex items-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Informasi Pesanan
@@ -39,7 +39,7 @@
 
                 <div>
                     <p class="text-gray-500">Status Pesanan</p>
-                    <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
+                    <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700">
                         {{ $order->status_pesanan }}
                     </span>
                 </div>
@@ -122,7 +122,7 @@
 
                         {{-- KIRI: Info File --}}
                         <div class="flex items-center space-x-3">
-                            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-purple-500"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -183,7 +183,7 @@
                             {{-- 3. Tombol Download --}}
                             {{-- Pastikan route 'orders.file.download' bisa diakses Admin juga, atau buat route khusus admin --}}
                             <a href="{{ route('orders.file.download', $file->file_id) }}" 
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg
                                     transition text-sm font-semibold flex items-center gap-2 shadow-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -210,7 +210,7 @@
             @endphp
 
             @if(in_array($order->status_pesanan, $allowedStatus) && !$hasFinal)
-            <div class="border-t border-gray-100 bg-blue-50/50 p-6"
+            <div class="border-t border-gray-100 bg-indigo-50/50 p-6"
                 x-data="{ file: null, preview: null }">
 
                 <form action="{{ route('admin.orders.upload', $order->order_id) }}"
@@ -239,14 +239,14 @@
                     {{-- Dropzone --}}
                     <div
                         @click="$refs.fileInput.click()"
-                        class="cursor-pointer border-2 border-dashed border-blue-300
+                        class="cursor-pointer border-2 border-dashed border-indigo-300
                             rounded-xl p-6 text-center bg-white
-                            hover:bg-blue-50 transition">
+                            hover:bg-indigo-50 transition">
 
                         <template x-if="!file">
                             <div>
                                 <svg xmlns="http://www.w3.org/2000/svg" 
-                                    class="mx-auto h-10 w-10 text-blue-500 mb-2" 
+                                    class="mx-auto h-10 w-10 text-indigo-500 mb-2" 
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" 
                                         d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
@@ -291,7 +291,7 @@
                         :disabled="!file"
                         class="w-full px-4 py-2 rounded-lg font-semibold transition
                             text-white
-                            bg-blue-600 hover:bg-blue-700
+                            bg-indigo-600 hover:bg-indigo-700
                             disabled:bg-gray-300 disabled:cursor-not-allowed">
                         Upload File
                     </button>
@@ -352,7 +352,7 @@
                         <div class="mt-3">
                             <a
                                 href="{{ route('invoices.show', $invoice->invoice_id) }}"
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white
+                                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white
                                     rounded-lg transition text-sm w-full block text-center"
                                 title="{{ $invoice->status_pembayaran === 'Menunggu Verifikasi'
                                     ? 'Verifikasi pembayaran invoice ini'

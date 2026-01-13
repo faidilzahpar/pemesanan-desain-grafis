@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Karya')
+@section('title', 'Edit Karya')
 
 @section('content')
 <div class="bg-white shadow-lg rounded-xl p-4 md:p-8 min-h-[calc(100vh-6rem)]">
     {{-- Heading --}}
     <div class="flex items-center justify-between mb-5">
-        <h1 class="text-3xl font-bold text-gray-800">Tambah Karya</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Edit Karya</h1>
 
         <a href="{{ route('admin.portfolio.index') }}"
             class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg shadow-sm transition">
@@ -20,10 +20,11 @@
     {{-- Form Card --}}
     <div class="bg-white p-8 rounded-xl">
 
-        <form action="{{ route('admin.portfolio.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.portfolio.update', $portfolio->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
+            @method('PUT') {{-- Penting untuk proses Update --}}
 
-            {{-- 1. Judul Karya --}}
+            {{-- Judul Karya --}}
             <div class="mb-6">
                 <label for="judul" class="font-semibold text-gray-900 mb-2 block">
                     Judul Karya
@@ -31,36 +32,40 @@
                 <input type="text" name="judul" id="judul"
                     class="w-full px-4 py-3 border rounded-lg shadow-sm border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition"
                     placeholder="Masukkan judul portofolio"
-                    value="{{ old('judul') }}" required>
+                    value="{{ old('judul', $portfolio->judul) }}" required>
 
                 @error('judul')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
-            {{-- 2. Kategori (DITAMBAHKAN) --}}
+            {{-- Kategori (Ditambahkan sesuai Controller store Anda) --}}
             <div class="mb-6">
                 <label for="kategori" class="font-semibold text-gray-900 mb-2 block">
                     Kategori
                 </label>
                 <input type="text" name="kategori" id="kategori"
                     class="w-full px-4 py-3 border rounded-lg shadow-sm border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                    placeholder="Contoh: Logo, Web Design, Illustration"
-                    value="{{ old('kategori') }}" required>
+                    placeholder="Contoh: Logo, Web Design, dll"
+                    value="{{ old('kategori', $portfolio->kategori) }}" required>
 
                 @error('kategori')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
-            {{-- 3. Gambar Karya (Alpine JS Upload) --}}
+            {{-- Gambar Karya (Alpine JS Upload dengan Preview Gambar Lama) --}}
             <div class="mb-6">
                 <label class="font-semibold text-gray-900 mb-2 block">
                     Gambar Karya
                 </label>
 
+                {{-- Inisialisasi Alpine dengan gambar lama --}}
                 <div class="border border-dashed border-indigo-300 rounded-xl p-6 bg-indigo-50/40"
-                    x-data="{ file: null, preview: null }">
+                    x-data="{ 
+                        file: null, 
+                        preview: '{{ asset('storage/' . $portfolio->gambar) }}' 
+                    }">
 
                     <input type="file"
                         name="gambar"
@@ -70,45 +75,37 @@
                             file = $event.target.files[0];
                             if (file && file.type.startsWith('image/')) {
                                 preview = URL.createObjectURL(file);
-                            } else {
-                                preview = null;
                             }
                         ">
 
+                    {{-- Dropzone Area --}}
                     <div @click="$refs.fileInput.click()"
                         class="cursor-pointer bg-white rounded-xl p-6 text-center
                                 hover:bg-indigo-50 transition border border-transparent hover:border-indigo-200">
 
-                        <template x-if="!file">
-                            <div>
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="mx-auto h-10 w-10 text-indigo-500 mb-3"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <p class="font-semibold text-slate-700">
-                                    Klik untuk upload gambar karya
-                                </p>
-                                <p class="text-xs text-slate-500 mt-1">
-                                    JPG atau PNG (Maks. 2MB)
-                                </p>
-                            </div>
-                        </template>
+                        {{-- State Preview (Selalu muncul karena defaultnya gambar lama) --}}
+                        <div class="flex flex-col items-center space-y-2">
+                            <template x-if="preview">
+                                <img :src="preview"
+                                    class="max-h-64 rounded-lg border shadow-sm object-cover">
+                            </template>
 
-                        <template x-if="file">
-                            <div class="flex flex-col items-center space-y-2">
-                                <template x-if="preview">
-                                    <img :src="preview"
-                                        class="max-h-64 rounded-lg border shadow-sm object-cover">
-                                </template>
+                            {{-- Jika file belum diganti, tampilkan info gambar lama --}}
+                            <template x-if="!file">
+                                <p class="text-sm text-slate-500 mt-2">
+                                    Gambar saat ini. Klik untuk mengganti.
+                                </p>
+                            </template>
 
-                                <p class="text-sm font-semibold text-gray-700" x-text="file.name"></p>
-                                <p class="text-xs text-slate-500"
-                                   x-text="(file.size / 1024 / 1024).toFixed(2) + ' MB'"></p>
-                            </div>
-                        </template>
+                            {{-- Jika file baru dipilih, tampilkan nama file baru --}}
+                            <template x-if="file">
+                                <div class="mt-2">
+                                    <p class="text-sm font-semibold text-gray-700" x-text="file.name"></p>
+                                    <p class="text-xs text-slate-500"
+                                    x-text="(file.size / 1024 / 1024).toFixed(2) + ' MB'"></p>
+                                </div>
+                            </template>
+                        </div>
 
                     </div>
                 </div>
@@ -118,14 +115,14 @@
                 @enderror
             </div>
 
-            {{-- 4. Deskripsi (DITAMBAHKAN) --}}
+            {{-- Deskripsi (Ditambahkan sesuai Controller store Anda) --}}
             <div class="mb-6">
                 <label for="deskripsi" class="font-semibold text-gray-900 mb-2 block">
                     Deskripsi
                 </label>
                 <textarea name="deskripsi" id="deskripsi" rows="4"
                     class="w-full px-4 py-3 border rounded-lg shadow-sm border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                    placeholder="Jelaskan detail karya ini...">{{ old('deskripsi') }}</textarea>
+                    placeholder="Deskripsi karya...">{{ old('deskripsi', $portfolio->deskripsi) }}</textarea>
 
                 @error('deskripsi')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -139,7 +136,7 @@
             <div class="flex justify-end">
                 <button type="submit"
                     class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 hover:shadow-indigo-500/50 transition duration-300">
-                    <span>Simpan Karya</span>
+                    <span>Simpan Perubahan</span>
                 </button>
             </div>
         </form>

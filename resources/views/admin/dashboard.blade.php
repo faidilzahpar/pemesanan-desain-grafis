@@ -21,7 +21,7 @@
         },
         updateStats() {
             // Fetch ke route baru + timestamp anti-cache
-            fetch('{{ route('admin.dashboard.stats') }}?t=' + new Date().getTime())
+            fetch('{{ route('admin.stats') }}?t=' + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
                     this.stats = data; // Update semua angka sekaligus

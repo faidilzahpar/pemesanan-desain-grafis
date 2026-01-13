@@ -26,13 +26,13 @@
                    name="tableSearch" 
                    value="{{ request('tableSearch') }}"
                    placeholder="Cari jenis desain..." 
-                   class="w-full py-2 pl-10 pr-4 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                   class="w-full py-2 pl-10 pr-4 border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
         </form>
 
         {{-- TOMBOL TAMBAH --}}
         <a href="{{ route('design-types.create') }}"
-           class="px-5 py-2 bg-blue-600 text-white font-medium rounded-lg 
-                  hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap">
+           class="px-5 py-2 bg-indigo-600 text-white font-medium rounded-lg 
+                  hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
             </svg>
@@ -51,53 +51,69 @@
 <div class="bg-white shadow-xl rounded-xl overflow-hidden ring-1 ring-gray-200/50">
 
     {{-- TABLE --}}
-    <div class="hidden md:block overflow-x-auto relative">
+    <div class="shadow-xl rounded-xl overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-500 whitespace-nowrap">
-            <thead class="text-xs uppercase text-white bg-blue-600">
+            <thead class="text-xs uppercase text-white bg-indigo-600">
                 <tr>
                     @php
                         $sortCol = request('tableSortColumn');
                         $sortDir = request('tableSortDirection');
                         
+                        // LOGIKA 3 TAHAP: ASC -> DESC -> DEFAULT (NULL)
                         $getSortUrl = function($col) use ($sortCol, $sortDir) {
-                            $nextDir = ($sortCol === $col && $sortDir === 'asc') ? 'desc' : 'asc';
-                            return request()->fullUrlWithQuery(['tableSortColumn' => $col, 'tableSortDirection' => $nextDir]);
+                            
+                            // 1. Jika kolom beda, atau belum ada sort, mulai dari ASC
+                            if ($sortCol !== $col) {
+                                return request()->fullUrlWithQuery(['tableSortColumn' => $col, 'tableSortDirection' => 'asc']);
+                            }
+                            
+                            // 2. Jika kolom sama dan sedang ASC, ubah jadi DESC
+                            if ($sortDir === 'asc') {
+                                return request()->fullUrlWithQuery(['tableSortColumn' => $col, 'tableSortDirection' => 'desc']);
+                            }
+                            
+                            // 3. Jika kolom sama dan sedang DESC, HAPUS param (kembali ke default)
+                            if ($sortDir === 'desc') {
+                                return request()->fullUrlWithQuery(['tableSortColumn' => null, 'tableSortDirection' => null]);
+                            }
                         };
                         
+                        // Fungsi icon panah (Tidak berubah)
                         $renderIcon = function($col) use ($sortCol, $sortDir) {
-                            if ($sortCol !== $col) return null;
+                            if ($sortCol !== $col) return null; // Tidak ada icon kalau default
+                            
                             return $sortDir === 'asc' 
                                 ? '<svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>'
                                 : '<svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
                         };
                     @endphp
 
-                    <th class="py-3 px-6 font-bold border-r border-blue-700 cursor-pointer hover:bg-blue-700 transition"
+                    <th class="py-3 px-6 font-bold border-r border-indigo-700 cursor-pointer hover:bg-indigo-700 transition"
                         onclick="window.location='{{ $getSortUrl('nama_jenis') }}'">
                         <div class="flex items-center">
                             Jenis Desain {!! $renderIcon('nama_jenis') !!}
                         </div>
                     </th>
 
-                    <th class="py-3 px-6 font-bold border-r border-blue-700 cursor-pointer hover:bg-blue-700 transition"
+                    <th class="py-3 px-6 font-bold border-r border-indigo-700 cursor-pointer hover:bg-indigo-700 transition"
                         onclick="window.location='{{ $getSortUrl('harga') }}'">
                         <div class="flex items-center">
                             Harga {!! $renderIcon('harga') !!}
                         </div>
                     </th>
 
-                    <th class="py-3 px-6 font-bold border-r border-blue-700 cursor-pointer hover:bg-blue-700 transition"
+                    <th class="py-3 px-6 font-bold border-r border-indigo-700 cursor-pointer hover:bg-indigo-700 transition"
                         onclick="window.location='{{ $getSortUrl('durasi') }}'">
                         <div class="flex items-center">
                             Durasi {!! $renderIcon('durasi') !!}
                         </div>
                     </th>
 
-                    <th class="py-3 px-6 font-bold border-r border-blue-700">
+                    <th class="py-3 px-6 font-bold border-r border-indigo-700">
                         Deskripsi
                     </th>
 
-                    <th class="py-3 px-6 font-bold border-r border-blue-700 cursor-pointer hover:bg-blue-700 transition text-center"
+                    <th class="py-3 px-6 font-bold border-r border-indigo-700 cursor-pointer hover:bg-indigo-700 transition text-center"
                         onclick="window.location='{{ $getSortUrl('is_active') }}'">
                         <div class="flex items-center justify-center">
                             Status {!! $renderIcon('is_active') !!}
@@ -146,7 +162,7 @@
 
                     <td class="py-4 px-6 flex justify-center space-x-4">
                         <a href="{{ route('design-types.edit', $item->design_type_id) }}"
-                           class="text-blue-600 hover:text-blue-400 transition duration-150 flex">
+                           class="text-indigo-600 hover:text-indigo-400 transition duration-150 flex">
                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                             <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
                             <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
@@ -170,15 +186,11 @@
             </tbody>
         </table>
     </div>
-
-    {{-- PAGINATION --}}
-    <div class="p-6">
-        {{ $types->links() }}
-    </div>
 </div>
 
-<div class="mt-8 text-center text-sm text-gray-500">
-    Total jenis desain: <span class="font-bold">{{ $types->total() }}</span>
+    {{-- PAGINATION --}}
+<div class="p-6">
+    {{ $types->links() }}
 </div>
 @endif
 @endsection

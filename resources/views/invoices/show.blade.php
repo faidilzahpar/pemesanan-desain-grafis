@@ -256,82 +256,152 @@
 
         {{-- FORM UPLOAD / REPLACE BUKTI --}}
         @if(
-            !$isExpired
-            && auth()->check()
-            && auth()->user()->is_admin == 0
-            && in_array($invoice->order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
-            && in_array($invoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak'])
-        )
-            <form
-                action="{{ route('invoices.upload', $invoice->invoice_id) }}"
-                method="POST"
-                enctype="multipart/form-data"
-                class="space-y-4"
-                x-data="{ file: null, preview: null }"
-            >
-                @csrf
+        !$isExpired
+        && auth()->check()
+        && auth()->user()->is_admin == 0
+        && in_array($invoice->order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
+        && in_array($invoice->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak'])
+    )
+        <form
+            action="{{ route('invoices.upload', $invoice->invoice_id) }}"
+            method="POST"
+            enctype="multipart/form-data"
+            class="space-y-4"
+            x-data="{ 
+                file: null, 
+                preview: null, 
+                error: null,
+                validateFile(event) {
+                    const selected = event.target.files[0];
+                    
+                    // 1. Jika batal pilih file
+                    if (!selected) return;
 
-                <div class="border border-dashed border-indigo-300 rounded-xl p-6 bg-indigo-50/40">
-                    <input
-                        type="file"
-                        name="bukti_pembayaran"
-                        x-ref="fileInput"
-                        accept="image/*,.pdf"
-                        class="hidden"
-                        required
-                        @change="
-                            file = $event.target.files[0];
-                            preview = file && file.type.startsWith('image/')
-                                ? URL.createObjectURL(file)
-                                : null;
-                        "
-                    >
+                    // 2. Cek Ukuran (10MB)
+                    if (selected.size > 10485760) {
+                        this.error = 'Ukuran file terlalu besar! Maksimal 10MB.';
+                        this.file = null;
+                        this.preview = null;
+                        event.target.value = ''; // Reset input
+                        return;
+                    }
 
-                    <div
-                        @click="$refs.fileInput.click()"
-                        class="cursor-pointer bg-white rounded-xl p-6 text-center
-                            hover:bg-indigo-50 transition"
-                    >
-                        <template x-if="!file">
-                            <div>
-                                <p class="font-semibold text-slate-700">
-                                    Klik untuk upload / ganti bukti pembayaran
-                                </p>
-                                <p class="text-xs text-slate-500 mt-1">
-                                    JPG, PNG, atau PDF (maks. 10MB)
-                                </p>
+                    // 3. Cek Tipe File
+                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+                    if (!validTypes.includes(selected.type)) {
+                        this.error = 'Format file tidak didukung! Hanya JPG, PNG, atau PDF.';
+                        this.file = null;
+                        this.preview = null;
+                        event.target.value = ''; // Reset input
+                        return;
+                    }
+
+                    // 4. Jika Lolos Validasi
+                    this.error = null;
+                    this.file = selected;
+
+                    // Buat Preview hanya jika Gambar
+                    if (selected.type.startsWith('image/')) {
+                        this.preview = URL.createObjectURL(selected);
+                    } else {
+                        this.preview = null; // PDF tidak perlu preview gambar
+                    }
+                }
+            }"
+        >
+            @csrf
+
+            {{-- AREA UPLOAD --}}
+            <div class="border border-dashed border-indigo-300 rounded-xl p-6 bg-indigo-50/40">
+                
+                {{-- Hidden Input --}}
+                <input
+                    type="file"
+                    name="bukti_pembayaran"
+                    x-ref="fileInput"
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    class="hidden"
+                    required
+                    @change="validateFile($event)"
+                >
+
+                {{-- Dropzone UI --}}
+                <div
+                    @click="$refs.fileInput.click()"
+                    class="cursor-pointer bg-white rounded-xl p-6 text-center
+                        hover:bg-indigo-50 transition relative"
+                >
+                    {{-- KONDISI 1: BELUM ADA FILE --}}
+                    <template x-if="!file">
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-indigo-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            <p class="font-semibold text-slate-700">
+                                Klik untuk upload bukti pembayaran
+                            </p>
+                            <p class="text-xs text-slate-500 mt-1">
+                                JPG, PNG, atau PDF (maks. 10MB)
+                            </p>
+                        </div>
+                    </template>
+
+                    {{-- KONDISI 2: FILE SUDAH DIPILIH --}}
+                    <template x-if="file">
+                        <div class="flex flex-col items-center space-y-3">
+                            
+                            {{-- A. Preview Gambar --}}
+                            <template x-if="preview">
+                                <img :src="preview" class="max-h-40 rounded-lg border shadow object-contain">
+                            </template>
+
+                            {{-- B. Ikon PDF (Jika PDF) --}}
+                            <template x-if="!preview && file.type === 'application/pdf'">
+                                <div class="h-20 w-20 bg-red-100 text-red-500 rounded-lg flex items-center justify-center border border-red-200">
+                                    <span class="font-bold text-xl">PDF</span>
+                                </div>
+                            </template>
+
+                            {{-- Info File --}}
+                            <div class="text-center">
+                                <p class="text-sm font-semibold text-slate-800" x-text="file.name"></p>
+                                <p class="text-xs text-slate-500" x-text="(file.size / 1024 / 1024).toFixed(2) + ' MB'"></p>
+                                <p class="text-xs text-indigo-600 mt-1 font-medium hover:underline">Klik untuk ganti file</p>
                             </div>
-                        </template>
+                        </div>
+                    </template>
+                </div>
 
-                        <template x-if="file">
-                            <div class="flex flex-col items-center space-y-2">
-                                <img x-show="preview"
-                                    :src="preview"
-                                    class="max-h-40 rounded-lg border shadow">
-                                <p class="text-sm font-semibold" x-text="file.name"></p>
-                                <p class="text-xs text-slate-500"
-                                    x-text="(file.size / 1024 / 1024).toFixed(2) + ' MB'"></p>
-                            </div>
-                        </template>
+                {{-- PESAN ERROR (Muncul jika file ditolak) --}}
+                <template x-if="error">
+                    <div class="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-red-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-sm font-medium" x-text="error"></span>
                     </div>
-                </div>
+                </template>
+            </div>
 
-                <div class="text-center">
-                    <button
-                        type="submit"
-                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg
-                            hover:bg-indigo-700 transition font-semibold"
-                    >
-                        Upload Bukti Pembayaran
-                    </button>
-                </div>
-            </form>
+            {{-- TOMBOL SUBMIT --}}
+            <div class="text-center">
+                <button
+                    type="submit"
+                    :disabled="!file"
+                    :class="!file ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-700'"
+                    class="px-6 py-2 bg-indigo-600 text-white rounded-lg transition font-semibold w-full sm:w-auto"
+                >
+                    Upload Bukti Pembayaran
+                </button>
+            </div>
+        </form>
 
-        @elseif($isExpired)
-            <p class="text-red-600 italic text-center">
-                Invoice telah expired. Silakan buat pesanan baru.
-            </p>
-        @endif
+    @elseif($isExpired)
+        <div class="p-4 bg-red-50 text-red-700 rounded-xl text-center border border-red-100">
+            <p class="font-medium">Invoice telah kadaluarsa.</p>
+            <p class="text-sm">Silakan buat pesanan baru untuk melanjutkan.</p>
+        </div>
+    @endif
     </div>
 
     {{-- BACK --}}

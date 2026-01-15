@@ -105,7 +105,11 @@ class OrderController extends Controller
             'design_type_id'     => 'required|exists:design_types,design_type_id',
             'deskripsi'          => 'required|string',
             'payment_method_id'  => 'required|exists:payment_methods,payment_method_id',
-            'referensi_desain'   => 'nullable|file|max:10240',
+            'referensi_desain'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+        ], [
+            'referensi_desain.mimes' => 'Format file harus berupa JPG, PNG, atau PDF.',
+            'referensi_desain.max'   => 'Ukuran file maksimal 10MB.',
+            'referensi_desain.file'  => 'Data yang diupload harus berupa file.',
         ]);
 
         // Ambil jenis desain

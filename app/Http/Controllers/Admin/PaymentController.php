@@ -40,18 +40,18 @@ class PaymentController extends Controller
             $direction = $request->tableSortDirection === 'desc' ? 'desc' : 'asc';
 
             if ($column === 'order_id') {
-                $query->join('orders', 'invoices.order_id', '=', 'orders.id')
+                $query->join('orders', 'invoices.order_id', '=', 'orders.order_id')
                     ->orderBy('orders.order_id', $direction)
                     ->select('invoices.*');
             } 
             elseif ($column === 'user_name') {
-                $query->join('orders', 'invoices.order_id', '=', 'orders.id')
-                    ->join('users', 'orders.user_id', '=', 'users.id')
+                $query->join('orders', 'invoices.order_id', '=', 'orders.order_id')
+                    ->join('users', 'orders.user_id', '=', 'users.user_id')
                     ->orderBy('users.name', $direction)
                     ->select('invoices.*');
             } 
             elseif ($column === 'jumlah_bayar') {
-                $query->join('orders', 'invoices.order_id', '=', 'orders.id')
+                $query->join('orders', 'invoices.order_id', '=', 'orders.order_id')
                     ->join('design_types', 'orders.design_type_id', '=', 'design_types.design_type_id')
                     ->orderBy('design_types.harga', $direction)
                     ->select('invoices.*');

@@ -1,41 +1,77 @@
 <?php
 
+namespace Tests\Feature\Auth;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-test('login screen can be rendered', function () {
-    $response = $this->get('/login');
+class AuthenticationTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $response->assertStatus(200);
-});
+    public function test_login_screen_can_be_rendered(): void
+    {
+        $response = $this->get('/login');
 
-test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+        $response->assertStatus(200);
+    }
 
-    $response = $this->post('/login', [
-        'email' => $user->email,
-        'password' => 'password',
-    ]);
+    public function test_users_can_authenticate_using_the_login_screen(): void
+    {
+        $user = User::factory()->create([
+            'password' => 'password',
+            'is_admin' => 0, // Test sebagai user biasa
+        ]);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
-});
+        $response = $this->post('/login', [
+            'login' => $user->email, 
+            'password' => 'password',
+        ]);
 
-test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+        $this->assertAuthenticated();
+        
+        // PERBAIKAN: Controller Anda redirect ke route('home'), bukan 'dashboard'
+        $response->assertRedirect(route('home')); 
+    }
 
-    $this->post('/login', [
-        'email' => $user->email,
-        'password' => 'wrong-password',
-    ]);
+    public function test_users_can_not_authenticate_with_invalid_password(): void
+    {
+        $user = User::factory()->create();
 
-    $this->assertGuest();
-});
+        $this->post('/login', [
+            'login' => $user->email, // PERBAIKAN: Ganti 'email' jadi 'login'
+            'password' => 'wrong-password',
+        ]);
 
-test('users can logout', function () {
-    $user = User::factory()->create();
+        $this->assertGuest();
+    }
+    
+    public function test_admin_redirected_to_admin_dashboard(): void
+    {
+        $admin = User::factory()->create([
+            'password' => bcrypt('password'),
+            'is_admin' => 1, // Test sebagai Admin
+        ]);
 
-    $response = $this->actingAs($user)->post('/logout');
+        $response = $this->post('/login', [
+            'login' => $admin->email, // Ganti 'email' jadi 'login'
+            'password' => 'password',
+        ]);
 
-    $this->assertGuest();
-    $response->assertRedirect('/');
-});
+        $this->assertAuthenticated();
+        
+        // Admin harusnya ke route('admin')
+        $response->assertRedirect(route('admin')); 
+    }
+
+    public function test_users_can_logout(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/logout');
+
+        $this->assertGuest();
+        $response->assertRedirect('/');
+    }
+}

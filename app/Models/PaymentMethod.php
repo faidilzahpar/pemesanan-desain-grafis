@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class PaymentMethod extends Model
 {
+    use HasFactory;
+    
     protected $primaryKey = 'payment_method_id';
     public $incrementing = false;
     protected $keyType = 'string';

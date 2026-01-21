@@ -9,7 +9,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $designTypes = DesignType::orderBy('created_at', 'asc')->get()->where('is_active', 1);
+        $designTypes = DesignType::where('is_active', 1)->orderBy('created_at', 'asc')->get();
 
         return view('home', compact('designTypes'));
     }

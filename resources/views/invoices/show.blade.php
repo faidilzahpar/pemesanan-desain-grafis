@@ -161,8 +161,7 @@
     @endif
 
     {{-- BUKTI PEMBAYARAN --}}
-    <div class="bg-white rounded-xl shadow p-5"
-        x-data="{ open: false }">
+    <div class="bg-white rounded-xl shadow p-5" x-data="{ open: false }">
 
         <h2 class="font-semibold text-gray-700 mb-4 text-center">
             Bukti Pembayaran
@@ -170,87 +169,95 @@
 
         {{-- TAMPILKAN BUKTI (JIKA ADA) --}}
         @if($invoice->bukti_path)
+            @php
+                $isPdf = str_ends_with(strtolower($invoice->bukti_path), '.pdf');
+            @endphp
+
             <div class="flex flex-col items-center mb-6">
 
-                {{-- Thumbnail --}}
-                <div class="relative group w-full max-w-xs">
-                    <img src="{{ asset('storage/' . $invoice->bukti_path) }}"
-                        alt="Bukti Pembayaran"
-                        @click="open = true"
-                        class="rounded-xl border-2 border-gray-100 shadow-sm
-                                cursor-zoom-in group-hover:opacity-90
-                                transition object-cover h-40 w-full">
+                {{-- THUMBNAIL AREA --}}
+                <div class="relative group w-full max-w-xs cursor-pointer" @click="open = true">
+                    
+                    @if($isPdf)
+                        {{-- TAMPILAN PDF (ICON) --}}
+                        <div class="flex flex-col items-center justify-center h-40 w-full rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <span class="text-sm font-semibold text-gray-600">File Dokumen (PDF)</span>
+                        </div>
+                    @else
+                        {{-- TAMPILAN GAMBAR (THUMBNAIL) --}}
+                        {{-- PERHATIKAN: src diganti jadi route() --}}
+                        <img src="{{ route('invoices.file', $invoice->invoice_id) }}"
+                            alt="Bukti Pembayaran"
+                            class="rounded-xl border-2 border-gray-100 shadow-sm object-cover h-40 w-full group-hover:opacity-90 transition">
+                    @endif
 
-                    <div class="absolute inset-0 flex items-center justify-center
-                                opacity-0 group-hover:opacity-100
-                                transition pointer-events-none">
+                    {{-- Hover Overlay (Sama untuk PDF/Gambar) --}}
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
                         <span class="bg-black/50 text-white px-3 py-1 rounded-full text-xs">
-                            Klik untuk Perbesar
+                            Klik untuk Lihat Detail
                         </span>
                     </div>
                 </div>
 
-                <button
-                    @click="open = true"
-                    class="mt-4 px-4 py-2 bg-indigo-600 text-white
-                        rounded-lg hover:bg-indigo-700
-                        transition text-sm font-semibold">
+                <button @click="open = true"
+                    class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
                     Lihat Bukti Pembayaran
                 </button>
             </div>
 
             {{-- MODAL --}}
             <div x-show="open" x-cloak x-transition.opacity
-                class="fixed inset-0 z-[100] flex flex-col items-center justify-center
-                        bg-gray-900/95 backdrop-blur-sm p-4"
+                class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gray-900/95 backdrop-blur-sm p-4"
                 @click.self="open = false">
 
-                <button @click="open = false"
-                        class="absolute top-5 right-5
-                            text-white/70 hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="h-10 w-10"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"/>
+                {{-- Tombol Close --}}
+                <button @click="open = false" class="absolute top-5 right-5 text-white/70 hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
 
-                <img src="{{ asset('storage/' . $invoice->bukti_path) }}"
-                    class="max-w-full max-h-[85vh] rounded-lg
-                            shadow-2xl border border-white/20 bg-white">
+                {{-- KONTEN MODAL (Logika PDF vs Gambar) --}}
+                <div class="w-full max-w-4xl max-h-[80vh] flex justify-center overflow-auto rounded-lg shadow-2xl bg-white border border-white/20">
+                    @if($isPdf)
+                        {{-- IFRAME UNTUK PDF --}}
+                        <iframe src="{{ route('invoices.file', $invoice->invoice_id) }}" 
+                                class="w-full h-[70vh] md:h-[80vh]" 
+                                frameborder="0">
+                        </iframe>
+                    @else
+                        {{-- IMAGE UNTUK GAMBAR --}}
+                        <img src="{{ route('invoices.file', $invoice->invoice_id) }}" 
+                            class="max-w-full max-h-[80vh] object-contain">
+                    @endif
+                </div>
 
-                {{-- AKSI ADMIN --}}
+                {{-- AKSI ADMIN (Tetap muncul di bawah modal) --}}
                 @if(
                     $invoice->status_pembayaran === 'Menunggu Verifikasi'
                     && auth()->check()
                     && auth()->user()->is_admin == 1
                 )
-                    <div class="mt-6 flex space-x-4">
-                        <form method="POST"
-                            action="{{ route('invoices.verify', $invoice->invoice_id) }}">
+                    <div class="mt-6 flex space-x-4 z-[101]">
+                        <form method="POST" action="{{ route('invoices.verify', $invoice->invoice_id) }}">
                             @csrf
-                            <button type="submit"
-                                    class="px-6 py-2 bg-green-600 text-white
-                                        rounded-lg hover:bg-green-700
-                                        font-semibold transition">
+                            <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition shadow-lg">
                                 Terima
                             </button>
                         </form>
 
-                        <form method="POST"
-                            action="{{ route('invoices.reject', $invoice->invoice_id) }}">
+                        <form method="POST" action="{{ route('invoices.reject', $invoice->invoice_id) }}">
                             @csrf
-                            <button type="submit"
-                                    class="px-6 py-2 bg-red-600 text-white
-                                        rounded-lg hover:bg-red-700
-                                        font-semibold transition">
+                            <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition shadow-lg">
                                 Tolak
                             </button>
                         </form>
                     </div>
                 @endif
+
             </div>
         @endif
 

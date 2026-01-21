@@ -15,17 +15,27 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Ambil ID user yang sedang login
+        $userId = $this->user()->user_id;
+
         return [
             'name' => ['required', 'string', 'max:255'],
+            
             'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                'required', 
+                'string', 
+                'lowercase', 
+                'email', 
+                'max:255', 
+                Rule::unique(User::class)->ignore($userId, 'user_id'), 
             ],
-            'no_hp' => ['required', 'string', 'max:15'],
+
+            'no_hp' => [
+                'required', 
+                'string', 
+                'max:15',
+                Rule::unique(User::class)->ignore($userId, 'user_id'),
+            ],
         ];
     }
 }

@@ -1,46 +1,78 @@
 <?php
 
+namespace Tests\Feature\Auth;
+
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
+use Tests\TestCase;
 
-test('email verification screen can be rendered', function () {
-    $user = User::factory()->unverified()->create();
+class EmailVerificationTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $response = $this->actingAs($user)->get('/verify-email');
+    public function test_email_verification_screen_can_be_rendered(): void
+    {
+        // User belum verifikasi
+        $user = User::factory()->unverified()->create();
 
-    $response->assertStatus(200);
-});
+        $response = $this->actingAs($user)->get('/verify-email');
 
-test('email can be verified', function () {
-    $user = User::factory()->unverified()->create();
+        $response->assertStatus(200);
+    }
 
-    Event::fake();
+    public function test_email_can_be_verified(): void
+    {
+        // 1. Setup User Unverified
+        $user = User::factory()->unverified()->create();
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)]
-    );
+        Event::fake();
 
-    $response = $this->actingAs($user)->get($verificationUrl);
+        // 2. Generate URL Verifikasi Manual
+        // PENTING: Gunakan 'id' => $user->user_id karena PK Anda string!
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->user_id, 'hash' => sha1($user->email)]
+        );
 
-    Event::assertDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
-});
+        // 3. Akses URL tersebut
+        $response = $this->actingAs($user)->get($verificationUrl);
 
-test('email is not verified with invalid hash', function () {
-    $user = User::factory()->unverified()->create();
+        // 4. Assertions
+        Event::assertDispatched(Verified::class);
+        
+        // Cek DB / Model instance
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+        
+        // Sesuai Controller: Redirect ke dashboard?verified=1
+        $response->assertRedirect(route('home').'?verified=1');
+    }
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1('wrong-email')]
-    );
+    public function test_email_is_not_verified_with_invalid_hash(): void
+    {
+        $user = User::factory()->unverified()->create();
 
-    $this->actingAs($user)->get($verificationUrl);
+        // Hash salah
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->user_id, 'hash' => sha1('wrong-email')]
+        );
 
-    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
-});
+        $this->actingAs($user)->get($verificationUrl);
+
+        $this->assertFalse($user->fresh()->hasVerifiedEmail());
+    }
+
+    public function test_verification_notification_can_be_resent(): void
+    {
+        $user = User::factory()->unverified()->create();
+
+        $response = $this->actingAs($user)->post('/email/verification-notification');
+
+        $response->assertSessionHas('status', 'verification-link-sent');
+    }
+}

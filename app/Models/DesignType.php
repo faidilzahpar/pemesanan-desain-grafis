@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DesignType extends Model
 {
+    use HasFactory;
+
     protected $primaryKey = 'design_type_id';
-    public $incrementing = false;
+    public $incrementing = false; 
+    protected $keyType = 'string';
 
     protected $fillable = [
         'design_type_id',

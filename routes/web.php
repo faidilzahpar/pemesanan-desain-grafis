@@ -46,6 +46,8 @@ Route::middleware('auth')->group(function () {
         ->name('orders.status-html'); //real time status
     Route::get('/orders/file/{file}/download', [OrderController::class, 'downloadFile'])
         ->name('orders.file.download');
+    Route::get('/invoices/{invoice}/file', [InvoiceController::class, 'showFile'])
+        ->name('invoices.file');
 });
 
 /*

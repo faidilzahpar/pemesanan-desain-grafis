@@ -24,12 +24,26 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            // user_id tidak perlu diisi di sini karena sudah ditangani otomatis 
+            // oleh static::creating di boot() Model User (Format: C26001)
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'no_hp' => fake()->unique()->phoneNumber(), // Tambahkan ini karena ada di fillable
+            'is_admin' => 0, // Default sebagai pelanggan biasa
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => 'password',
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * State khusus untuk membuat Admin
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => 1,
+        ]);
     }
 
     /**

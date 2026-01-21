@@ -41,7 +41,7 @@ class OrderController extends Controller
 
             if ($column === 'user_name') {
                 // Sort Relasi User
-                $query->join('users', 'orders.user_id', '=', 'users.id')
+                $query->join('users', 'orders.user_id', '=', 'users.user_id')
                       ->orderBy('users.name', $direction)
                       ->select('orders.*');
             } 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class InvoiceController extends Controller
 {
@@ -45,6 +46,25 @@ class InvoiceController extends Controller
             'isExpired',
             'paymentDeadline'
         ));
+    }
+
+    public function showFile(Invoice $invoice)
+    {
+        // Pastikan user berhak melihat (Admin atau Pemilik)
+        if (auth()->user()->is_admin == 0 && $invoice->order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Cek apakah file ada di disk public
+        if (!$invoice->bukti_path || !Storage::disk('public')->exists($invoice->bukti_path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        // Ambil full path dari file
+        $path = Storage::disk('public')->path($invoice->bukti_path);
+
+        // Tampilkan file ke browser (agar PDF/Gambar bisa dipreview)
+        return response()->file($path);
     }
 
     public function verify(Request $request, Invoice $invoice)

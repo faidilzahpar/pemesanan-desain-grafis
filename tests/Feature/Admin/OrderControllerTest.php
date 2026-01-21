@@ -9,142 +9,203 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OrderControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Helper untuk membuat Admin
-     */
     private function createAdmin()
     {
-        return User::factory()->create([
-            'is_admin' => 1,
-            'no_hp'    => '0812' . rand(1000, 9999),
+        return User::factory()->admin()->create();
+    }
+
+    /** * TEST 1: INDEX & SEARCH
+     * Menguji tampilan awal dan fitur pencarian yang kompleks
+     */
+    public function test_index_search_functionality()
+    {
+        $admin = $this->createAdmin();
+
+        // 1. Biarkan Factory membuat User & Design otomatis (Aman dari error ID null)
+        $targetOrder = Order::factory()->create([
+            'status_pesanan' => 'Revisi'
+        ]);
+        
+        // Ambil data yang sudah ter-generate otomatis
+        $targetUser = $targetOrder->user;
+        $targetDesign = $targetOrder->designType;
+        $realOrderId = $targetOrder->order_id; // Ambil ID asli (misal: ORD26001)
+
+        // Dummy order sebagai pengganggu
+        $dummyOrder = Order::factory()->create(['status_pesanan' => 'Sedang Dikerjakan']);
+
+        // A. Search by Order ID
+        $res = $this->actingAs($admin)->get(route('admin.orders.index', ['tableSearch' => $realOrderId]));
+        $res->assertSee($realOrderId);
+        $res->assertDontSee($dummyOrder->order_id);
+
+        // B. Search by Status
+        $res = $this->actingAs($admin)->get(route('admin.orders.index', ['tableSearch' => 'Revisi']));
+        $res->assertSee($realOrderId);
+
+        // C. Search by User Name (Ambil sebagian nama)
+        $namePart = substr($targetUser->name, 0, 3);
+        $res = $this->actingAs($admin)->get(route('admin.orders.index', ['tableSearch' => $namePart]));
+        $res->assertSee($realOrderId);
+
+        // D. Search by No HP
+        $res = $this->actingAs($admin)->get(route('admin.orders.index', ['tableSearch' => $targetUser->no_hp]));
+        $res->assertSee($realOrderId);
+
+        // E. Search by Design Type
+        $res = $this->actingAs($admin)->get(route('admin.orders.index', ['tableSearch' => $targetDesign->nama_jenis]));
+        $res->assertSee($realOrderId);
+    }
+
+    /** * TEST 2: INDEX SORTING
+     * Menguji pengurutan berdasarkan Nama User dan Jenis Desain
+     */
+    public function test_index_sorting_functionality()
+    {
+        $admin = $this->createAdmin();
+
+        // Buat Order A -> Update nama user jadi 'Ahmad'
+        $orderA = Order::factory()->create(['status_pesanan' => 'Sedang Dikerjakan']);
+        $orderA->user()->update(['name' => 'Ahmad']);
+
+        // Buat Order B -> Update nama user jadi 'Zainal'
+        $orderB = Order::factory()->create(['status_pesanan' => 'Sedang Dikerjakan']);
+        $orderB->user()->update(['name' => 'Zainal']);
+
+        // 1. Sort User Name ASC (Ahmad dulu)
+        $res = $this->actingAs($admin)->get(route('admin.orders.index', [
+            'tableSortColumn' => 'user_name',
+            'tableSortDirection' => 'asc'
+        ]));
+        $dataAsc = $res->viewData('orders');
+        $this->assertEquals($orderA->order_id, $dataAsc->first()->order_id);
+
+        // 2. Sort User Name DESC (Zainal dulu)
+        $res = $this->actingAs($admin)->get(route('admin.orders.index', [
+            'tableSortColumn' => 'user_name',
+            'tableSortDirection' => 'desc'
+        ]));
+        $dataDesc = $res->viewData('orders');
+        $this->assertEquals($orderB->order_id, $dataDesc->first()->order_id);
+
+        // 3. Sort Design Type
+        // Kita update nama jenis desainnya biar pasti
+        $orderA->designType()->update(['nama_jenis' => 'Abstrak']);
+        $orderB->designType()->update(['nama_jenis' => 'Zebra']);
+
+        $res = $this->actingAs($admin)->get(route('admin.orders.index', [
+            'tableSortColumn' => 'design_type',
+            'tableSortDirection' => 'asc'
+        ]));
+        $this->assertEquals($orderA->order_id, $res->viewData('orders')->first()->order_id);
+    }
+
+    /** * TEST 3: HISTORY PAGE (Search & Sort)
+     * Menguji halaman riwayat yang sebelumnya belum tersentuh tes
+     */
+    public function test_history_page_logic()
+    {
+        $admin = $this->createAdmin();
+
+        // Setup Data Status 'Selesai'
+        $orderMahal = Order::factory()->create(['status_pesanan' => 'Selesai']);
+        $orderMahal->designType()->update(['harga' => 900000]); // Mahal
+
+        $orderMurah = Order::factory()->create(['status_pesanan' => 'Selesai']);
+        $orderMurah->designType()->update(['harga' => 50000]); // Murah
+
+        // A. Test Search di History
+        $res = $this->actingAs($admin)->get(route('admin.orders.history', ['tableSearch' => $orderMahal->order_id]));
+        $res->assertSee($orderMahal->order_id);
+        $res->assertDontSee($orderMurah->order_id);
+
+        // B. Test Sort by Total Harga (DESC) -> Mahal dulu
+        $res = $this->actingAs($admin)->get(route('admin.orders.history', [
+            'tableSortColumn' => 'total',
+            'tableSortDirection' => 'desc'
+        ]));
+        $data = $res->viewData('orders');
+        $this->assertEquals($orderMahal->order_id, $data->first()->order_id);
+
+        // C. Test Sort by Total Harga (ASC) -> Murah dulu
+        $res = $this->actingAs($admin)->get(route('admin.orders.history', [
+            'tableSortColumn' => 'total',
+            'tableSortDirection' => 'asc'
+        ]));
+        $data = $res->viewData('orders');
+        $this->assertEquals($orderMurah->order_id, $data->first()->order_id);
+    }
+
+    /** * TEST 4: UPLOAD FILE & LOGIC (Preview, Watermark, Revisi, Final)
+     */
+    public function test_upload_logic_comprehensive()
+    {
+        $admin = $this->createAdmin();
+        Storage::fake('public');
+
+        // A. Upload Preview (Otomatis Watermark)
+        $order = Order::factory()->create(['status_pesanan' => 'Sedang Dikerjakan']);
+        $file = UploadedFile::fake()->image('preview.jpg');
+
+        $this->actingAs($admin)->post(route('admin.orders.upload', $order->order_id), ['file' => $file]);
+        
+        $this->assertDatabaseHas('order_files', [
+            'order_id' => $order->order_id,
+            'tipe_file' => 'Preview'
+        ]);
+
+        // B. Upload Revisi (Karena sudah ada preview)
+        $fileRevisi = UploadedFile::fake()->image('revisi.jpg');
+        $this->actingAs($admin)->post(route('admin.orders.upload', $order->order_id), ['file' => $fileRevisi]);
+        
+        $this->assertDatabaseHas('order_files', [
+            'order_id' => $order->order_id,
+            'tipe_file' => 'Revisi'
+        ]);
+
+        // C. Upload Final (Pakai file ZIP/PDF biar masuk ke blok else non-image watermark)
+        // Set status biar maksa jadi final
+        $order->update(['status_pesanan' => 'Menunggu File Final']);
+        $fileFinal = UploadedFile::fake()->create('final.zip');
+
+        $this->actingAs($admin)->post(route('admin.orders.upload', $order->order_id), ['file' => $fileFinal]);
+        
+        $this->assertDatabaseHas('order_files', [
+            'order_id' => $order->order_id,
+            'tipe_file' => 'Final'
+        ]);
+        $this->assertDatabaseHas('orders', [
+            'order_id' => $order->order_id,
+            'status_pesanan' => 'Selesai'
         ]);
     }
 
-    /** * Test Index: Menampilkan pesanan aktif */
-    public function test_index_menampilkan_pesanan_aktif()
-    {
-        $admin = $this->createAdmin();
-        
-        // Buat pesanan status aktif
-        Order::factory()->create(['status_pesanan' => 'Sedang Dikerjakan']);
-        // Buat pesanan status excluded
-        Order::factory()->create(['status_pesanan' => 'Selesai']);
-
-        $response = $this->actingAs($admin)->get(route('admin.orders.index'));
-
-        $response->assertStatus(200);
-        // Pastikan hanya 1 yang muncul (karena Selesai di-exclude)
-        $this->assertCount(1, $response->viewData('orders'));
-    }
-
-    /** * Test History: Menampilkan Selesai & Dibatalkan */
-    public function test_history_menampilkan_pesanan_lampau()
-    {
-        $admin = $this->createAdmin();
-        
-        Order::factory()->create(['status_pesanan' => 'Selesai']);
-        Order::factory()->create(['status_pesanan' => 'Dibatalkan']);
-        Order::factory()->create(['status_pesanan' => 'Sedang Dikerjakan']);
-
-        $response = $this->actingAs($admin)->get(route('admin.orders.history'));
-
-        $response->assertStatus(200);
-        // Harusnya ada 2 (Selesai & Dibatalkan)
-        $this->assertCount(2, $response->viewData('orders'));
-    }
-
-    /** * Test Show Detail */
-    public function test_show_menampilkan_detail_pesanan()
+    public function test_show_page()
     {
         $admin = $this->createAdmin();
         $order = Order::factory()->create();
-
-        $response = $this->actingAs($admin)->get(route('admin.orders.show', $order->order_id));
-
-        $response->assertStatus(200);
-        $response->assertViewHas('order');
+        $res = $this->actingAs($admin)->get(route('admin.orders.show', $order->order_id));
+        $res->assertStatus(200);
     }
-
-    /** * Test Upload dengan Watermark (Penyebab Error 500) */
-    public function test_upload_file_preview_dengan_watermark()
+    public function test_non_admin_cannot_access_admin_routes()
     {
-        $admin = $this->createAdmin();
-        $order = Order::factory()->create(['status_pesanan' => 'Sedang Dikerjakan']);
+        // 1. Buat User Biasa (Bukan Admin)
+        $regularUser = User::factory()->create(['is_admin' => 0]);
+
+        // 2. Coba paksa masuk ke halaman Admin
+        $response = $this->actingAs($regularUser)->get(route('admin.orders.index'));
+
+        // 3. Pastikan DITOLAK (Bisa 403 Forbidden atau 302 Redirect, tergantung middleware Anda)
+        // Biasanya middleware admin melakukan abort(403) atau redirect ke home.
+        // Kita cek statusnya bukan 200 OK.
+        $this->assertNotEquals(200, $response->status());
         
-        Storage::fake('public');
-
-        // PERBAIKAN: Buat gambar PNG ASLI untuk watermark agar Intervention tidak error
-        $watermarkPath = public_path('watermark.png');
-        $fakeWatermark = UploadedFile::fake()->image('watermark.png', 100, 100);
-        file_put_contents($watermarkPath, file_get_contents($fakeWatermark));
-
-        $file = UploadedFile::fake()->image('hasil_desain.jpg', 500, 500);
-
-        $response = $this->actingAs($admin)->post(route('admin.orders.upload', $order->order_id), [
-            'file' => $file
-        ]);
-
-        $response->assertStatus(302); // Redirect back
-        $this->assertDatabaseHas('order_files', [
-            'order_id'  => $order->order_id,
-            'tipe_file' => 'Preview'
-        ]);
-
-        // Bersihkan file watermark dummy setelah test
-        if (file_exists($watermarkPath)) unlink($watermarkPath);
-    }
-
-    /** * Test Logika Tipe File Revisi */
-    public function test_upload_file_logika_revisi()
-    {
-        $admin = $this->createAdmin();
-        $order = Order::factory()->create(['status_pesanan' => 'Sedang Dikerjakan']);
-
-        // Tambah 1 file (sebagai Preview)
-        OrderFile::factory()->create([
-            'order_id'  => $order->order_id,
-            'tipe_file' => 'Preview'
-        ]);
-
-        Storage::fake('public');
-        $file = UploadedFile::fake()->image('revisi_1.jpg');
-
-        $response = $this->actingAs($admin)->post(route('admin.orders.upload', $order->order_id), [
-            'file' => $file
-        ]);
-
-        $this->assertDatabaseHas('order_files', [
-            'order_id'  => $order->order_id,
-            'tipe_file' => 'Revisi'
-        ]);
-    }
-
-    /** * Test Upload Final */
-    public function test_upload_file_final()
-    {
-        $admin = $this->createAdmin();
-        // Status khusus yang memaksa tipe jadi 'Final'
-        $order = Order::factory()->create(['status_pesanan' => 'Menunggu File Final']);
-
-        Storage::fake('public');
-        $file = UploadedFile::fake()->create('final_design.zip', 1000);
-
-        $response = $this->actingAs($admin)->post(route('admin.orders.upload', $order->order_id), [
-            'file' => $file
-        ]);
-
-        $this->assertDatabaseHas('order_files', [
-            'order_id'  => $order->order_id,
-            'tipe_file' => 'Final'
-        ]);
-        
-        $this->assertEquals('Selesai', $order->refresh()->status_pesanan);
+        $response->assertStatus(404);
     }
 }

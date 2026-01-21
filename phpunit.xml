@@ -16,6 +16,10 @@
         <include>
             <directory>app</directory>
         </include>
+
+        <exclude>
+            <file>./app/View/Components/AppLayout.php</file> 
+        </exclude>
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>

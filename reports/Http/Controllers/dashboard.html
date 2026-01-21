@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for D:\laragon\www\pemesanan-desain-grafis\app\Http\Controllers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../../_css/bootstrap.min.css?v=12.5.0" rel="stylesheet" type="text/css">
+  <link href="../../_css/billboard.min.css?v=12.5.0" rel="stylesheet" type="text/css">
+  <link href="../../_css/style.css?v=12.5.0" rel="stylesheet" type="text/css">
+  <link href="../../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../../index.html">D:\laragon\www\pemesanan-desain-grafis\app</a></li>
+         <li class="breadcrumb-item"><a href="../index.html">Http</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Controllers</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classesCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Auth/EmailVerificationPromptController.php.html#10">App\Http\Controllers\Auth\EmailVerificationPromptController</a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="Auth/EmailVerificationNotificationController.php.html#9">App\Http\Controllers\Auth\EmailVerificationNotificationController</a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="Auth/VerifyEmailController.php.html#10">App\Http\Controllers\Auth\VerifyEmailController</a></td><td class="text-right">80%</td></tr>
+       <tr><td><a href="InvoiceController.php.html#10">App\Http\Controllers\InvoiceController</a></td><td class="text-right">84%</td></tr>
+       <tr><td><a href="Admin/PaymentController.php.html#9">App\Http\Controllers\Admin\PaymentController</a></td><td class="text-right">85%</td></tr>
+       <tr><td><a href="Admin/OrderController.php.html#12">App\Http\Controllers\Admin\OrderController</a></td><td class="text-right">89%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+         <th class="text-right">Complexity</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="InvoiceController.php.html#10">App\Http\Controllers\InvoiceController</a></td><td class="text-right">84.0%</td><td class="text-right">29</td><td class="text-right">32</td></tr>
+       <tr><td><a href="Admin/OrderController.php.html#12">App\Http\Controllers\Admin\OrderController</a></td><td class="text-right">89.9%</td><td class="text-right">24</td><td class="text-right">24</td></tr>
+       <tr><td><a href="Admin/PaymentController.php.html#9">App\Http\Controllers\Admin\PaymentController</a></td><td class="text-right">85.4%</td><td class="text-right">9</td><td class="text-right">9</td></tr>
+       <tr><td><a href="Auth/VerifyEmailController.php.html#10">App\Http\Controllers\Auth\VerifyEmailController</a></td><td class="text-right">80.0%</td><td class="text-right">3</td><td class="text-right">3</td></tr>
+       <tr><td><a href="Auth/EmailVerificationNotificationController.php.html#9">App\Http\Controllers\Auth\EmailVerificationNotificationController</a></td><td class="text-right">75.0%</td><td class="text-right">2</td><td class="text-right">2</td></tr>
+       <tr><td><a href="Auth/EmailVerificationPromptController.php.html#10">App\Http\Controllers\Auth\EmailVerificationPromptController</a></td><td class="text-right">66.7%</td><td class="text-right">2</td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2 style="margin-top: 3rem;">Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodsCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Admin/DesignTypeController.php.html#85"><abbr title="App\Http\Controllers\Admin\DesignTypeController::show">show</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="OrderController.php.html#228"><abbr title="App\Http\Controllers\OrderController::downloadFile">downloadFile</abbr></a></td><td class="text-right">54%</td></tr>
+       <tr><td><a href="Auth/EmailVerificationPromptController.php.html#15"><abbr title="App\Http\Controllers\Auth\EmailVerificationPromptController::__invoke">__invoke</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="InvoiceController.php.html#51"><abbr title="App\Http\Controllers\InvoiceController::showFile">showFile</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="Auth/EmailVerificationNotificationController.php.html#14"><abbr title="App\Http\Controllers\Auth\EmailVerificationNotificationController::store">store</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="InvoiceController.php.html#105"><abbr title="App\Http\Controllers\InvoiceController::reject">reject</abbr></a></td><td class="text-right">76%</td></tr>
+       <tr><td><a href="InvoiceController.php.html#70"><abbr title="App\Http\Controllers\InvoiceController::verify">verify</abbr></a></td><td class="text-right">78%</td></tr>
+       <tr><td><a href="Admin/OrderController.php.html#66"><abbr title="App\Http\Controllers\Admin\OrderController::history">history</abbr></a></td><td class="text-right">79%</td></tr>
+       <tr><td><a href="Auth/VerifyEmailController.php.html#15"><abbr title="App\Http\Controllers\Auth\VerifyEmailController::__invoke">__invoke</abbr></a></td><td class="text-right">80%</td></tr>
+       <tr><td><a href="Admin/PaymentController.php.html#11"><abbr title="App\Http\Controllers\Admin\PaymentController::index">index</abbr></a></td><td class="text-right">85%</td></tr>
+       <tr><td><a href="InvoiceController.php.html#135"><abbr title="App\Http\Controllers\InvoiceController::upload">upload</abbr></a></td><td class="text-right">85%</td></tr>
+       <tr><td><a href="InvoiceController.php.html#172"><abbr title="App\Http\Controllers\InvoiceController::handleAutoExpire">handleAutoExpire</abbr></a></td><td class="text-right">87%</td></tr>
+       <tr><td><a href="OrderController.php.html#195"><abbr title="App\Http\Controllers\OrderController::getStatusHtml">getStatusHtml</abbr></a></td><td class="text-right">88%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3 style="margin-top: 2rem;">Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+         <th class="text-right">Complexity</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Admin/PaymentController.php.html#11"><abbr title="App\Http\Controllers\Admin\PaymentController::index">index</abbr></a></td><td class="text-right">85.4%</td><td class="text-right">9</td><td class="text-right">9</td></tr>
+       <tr><td><a href="Admin/OrderController.php.html#66"><abbr title="App\Http\Controllers\Admin\OrderController::history">history</abbr></a></td><td class="text-right">79.4%</td><td class="text-right">8</td><td class="text-right">8</td></tr>
+       <tr><td><a href="OrderController.php.html#228"><abbr title="App\Http\Controllers\OrderController::downloadFile">downloadFile</abbr></a></td><td class="text-right">54.5%</td><td class="text-right">5</td><td class="text-right">7</td></tr>
+       <tr><td><a href="OrderController.php.html#195"><abbr title="App\Http\Controllers\OrderController::getStatusHtml">getStatusHtml</abbr></a></td><td class="text-right">88.2%</td><td class="text-right">6</td><td class="text-right">6</td></tr>
+       <tr><td><a href="InvoiceController.php.html#51"><abbr title="App\Http\Controllers\InvoiceController::showFile">showFile</abbr></a></td><td class="text-right">66.7%</td><td class="text-right">5</td><td class="text-right">5</td></tr>
+       <tr><td><a href="InvoiceController.php.html#70"><abbr title="App\Http\Controllers\InvoiceController::verify">verify</abbr></a></td><td class="text-right">78.9%</td><td class="text-right">5</td><td class="text-right">5</td></tr>
+       <tr><td><a href="InvoiceController.php.html#105"><abbr title="App\Http\Controllers\InvoiceController::reject">reject</abbr></a></td><td class="text-right">76.5%</td><td class="text-right">5</td><td class="text-right">5</td></tr>
+       <tr><td><a href="InvoiceController.php.html#135"><abbr title="App\Http\Controllers\InvoiceController::upload">upload</abbr></a></td><td class="text-right">85.7%</td><td class="text-right">5</td><td class="text-right">5</td></tr>
+       <tr><td><a href="InvoiceController.php.html#172"><abbr title="App\Http\Controllers\InvoiceController::handleAutoExpire">handleAutoExpire</abbr></a></td><td class="text-right">87.5%</td><td class="text-right">4</td><td class="text-right">4</td></tr>
+       <tr><td><a href="Auth/VerifyEmailController.php.html#15"><abbr title="App\Http\Controllers\Auth\VerifyEmailController::__invoke">__invoke</abbr></a></td><td class="text-right">80.0%</td><td class="text-right">3</td><td class="text-right">3</td></tr>
+       <tr><td><a href="Auth/EmailVerificationNotificationController.php.html#14"><abbr title="App\Http\Controllers\Auth\EmailVerificationNotificationController::store">store</abbr></a></td><td class="text-right">75.0%</td><td class="text-right">2</td><td class="text-right">2</td></tr>
+       <tr><td><a href="Auth/EmailVerificationPromptController.php.html#15"><abbr title="App\Http\Controllers\Auth\EmailVerificationPromptController::__invoke">__invoke</abbr></a></td><td class="text-right">66.7%</td><td class="text-right">2</td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 12.5.0</a> using <a href="https://www.php.net/" target="_top">PHP 8.3.15</a> and <a href="https://phpunit.de/">PHPUnit 12.4.4</a> at Wed Jan 21 16:50:44 WIB 2026.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../../_js/billboard.pkgd.min.js?v=12.5.0" type="text/javascript"></script>
+  <script type="application/json" id="complexity_class">[[66.66666666666666,2,"Auth\/EmailVerificationPromptController.php.html#10","App\\Http\\Controllers\\Auth\\EmailVerificationPromptController","2.15"],[75,2,"Auth\/EmailVerificationNotificationController.php.html#9","App\\Http\\Controllers\\Auth\\EmailVerificationNotificationController","2.06"],[80,3,"Auth\/VerifyEmailController.php.html#10","App\\Http\\Controllers\\Auth\\VerifyEmailController","3.07"],[84,29,"InvoiceController.php.html#10","App\\Http\\Controllers\\InvoiceController","32.44"],[85.36585365853658,9,"Admin\/PaymentController.php.html#9","App\\Http\\Controllers\\Admin\\PaymentController","9.25"],[89.90825688073394,24,"Admin\/OrderController.php.html#12","App\\Http\\Controllers\\Admin\\OrderController","24.59"],[93.83561643835617,26,"OrderController.php.html#15","App\\Http\\Controllers\\OrderController","26.16"],[96.96969696969697,14,"Admin\/DesignTypeController.php.html#9","App\\Http\\Controllers\\Admin\\DesignTypeController","14"],[100,2,"Admin\/DashboardController.php.html#11","App\\Http\\Controllers\\Admin\\DashboardController","2"],[100,13,"Admin\/PortfolioController.php.html#10","App\\Http\\Controllers\\Admin\\PortfolioController","13"],[100,4,"Auth\/AuthenticatedSessionController.php.html#12","App\\Http\\Controllers\\Auth\\AuthenticatedSessionController","4"],[100,3,"Auth\/ConfirmablePasswordController.php.html#12","App\\Http\\Controllers\\Auth\\ConfirmablePasswordController","3"],[100,3,"Auth\/NewPasswordController.php.html#16","App\\Http\\Controllers\\Auth\\NewPasswordController","3"],[100,1,"Auth\/PasswordController.php.html#11","App\\Http\\Controllers\\Auth\\PasswordController","1"],[100,3,"Auth\/PasswordResetLinkController.php.html#11","App\\Http\\Controllers\\Auth\\PasswordResetLinkController","3"],[100,2,"Auth\/RegisteredUserController.php.html#16","App\\Http\\Controllers\\Auth\\RegisteredUserController","2"],[100,0,"Controller.php.html#5","App\\Http\\Controllers\\Controller","0"],[100,1,"HomeController.php.html#8","App\\Http\\Controllers\\HomeController","1"],[100,1,"PortfolioController.php.html#8","App\\Http\\Controllers\\PortfolioController","1"],[100,4,"ProfileController.php.html#12","App\\Http\\Controllers\\ProfileController","4"]]</script>
+  <script type="application/json" id="complexity_method">[[0,1,"Admin\/DesignTypeController.php.html#85","App\\Http\\Controllers\\Admin\\DesignTypeController::show","2"],[54.54545454545454,5,"OrderController.php.html#228","App\\Http\\Controllers\\OrderController::downloadFile","7.35"],[66.66666666666666,2,"Auth\/EmailVerificationPromptController.php.html#15","App\\Http\\Controllers\\Auth\\EmailVerificationPromptController::__invoke","2.15"],[66.66666666666666,5,"InvoiceController.php.html#51","App\\Http\\Controllers\\InvoiceController::showFile","5.93"],[75,2,"Auth\/EmailVerificationNotificationController.php.html#14","App\\Http\\Controllers\\Auth\\EmailVerificationNotificationController::store","2.06"],[76.47058823529412,5,"InvoiceController.php.html#105","App\\Http\\Controllers\\InvoiceController::reject","5.33"],[78.94736842105263,5,"InvoiceController.php.html#70","App\\Http\\Controllers\\InvoiceController::verify","5.23"],[79.41176470588235,8,"Admin\/OrderController.php.html#66","App\\Http\\Controllers\\Admin\\OrderController::history","8.56"],[80,3,"Auth\/VerifyEmailController.php.html#15","App\\Http\\Controllers\\Auth\\VerifyEmailController::__invoke","3.07"],[85.36585365853658,9,"Admin\/PaymentController.php.html#11","App\\Http\\Controllers\\Admin\\PaymentController::index","9.25"],[85.71428571428571,5,"InvoiceController.php.html#135","App\\Http\\Controllers\\InvoiceController::upload","5.07"],[87.5,4,"InvoiceController.php.html#172","App\\Http\\Controllers\\InvoiceController::handleAutoExpire","4.03"],[88.23529411764706,6,"OrderController.php.html#195","App\\Http\\Controllers\\OrderController::getStatusHtml","6.06"],[92.85714285714286,8,"Admin\/OrderController.php.html#132","App\\Http\\Controllers\\Admin\\OrderController::uploadFile","8.02"],[95.23809523809523,5,"InvoiceController.php.html#12","App\\Http\\Controllers\\InvoiceController::show","5"],[95.45454545454545,2,"OrderController.php.html#49","App\\Http\\Controllers\\OrderController::show","2"],[95.83333333333334,4,"OrderController.php.html#153","App\\Http\\Controllers\\OrderController::approve","4"],[96.7741935483871,7,"Admin\/OrderController.php.html#14","App\\Http\\Controllers\\Admin\\OrderController::index","7"],[100,1,"Admin\/DashboardController.php.html#13","App\\Http\\Controllers\\Admin\\DashboardController::index","1"],[100,1,"Admin\/DashboardController.php.html#51","App\\Http\\Controllers\\Admin\\DashboardController::getStats","1"],[100,6,"Admin\/DesignTypeController.php.html#14","App\\Http\\Controllers\\Admin\\DesignTypeController::index","6"],[100,1,"Admin\/DesignTypeController.php.html#53","App\\Http\\Controllers\\Admin\\DesignTypeController::create","1"],[100,1,"Admin\/DesignTypeController.php.html#61","App\\Http\\Controllers\\Admin\\DesignTypeController::store","1"],[100,1,"Admin\/DesignTypeController.php.html#95","App\\Http\\Controllers\\Admin\\DesignTypeController::edit","1"],[100,2,"Admin\/DesignTypeController.php.html#105","App\\Http\\Controllers\\Admin\\DesignTypeController::update","2"],[100,1,"Admin\/DesignTypeController.php.html#136","App\\Http\\Controllers\\Admin\\DesignTypeController::destroy","1"],[100,1,"Admin\/DesignTypeController.php.html#145","App\\Http\\Controllers\\Admin\\DesignTypeController::toggle","1"],[100,1,"Admin\/OrderController.php.html#125","App\\Http\\Controllers\\Admin\\OrderController::show","1"],[100,6,"Admin\/PortfolioController.php.html#13","App\\Http\\Controllers\\Admin\\PortfolioController::index","6"],[100,1,"Admin\/PortfolioController.php.html#50","App\\Http\\Controllers\\Admin\\PortfolioController::create","1"],[100,1,"Admin\/PortfolioController.php.html#56","App\\Http\\Controllers\\Admin\\PortfolioController::store","1"],[100,1,"Admin\/PortfolioController.php.html#77","App\\Http\\Controllers\\Admin\\PortfolioController::edit","1"],[100,3,"Admin\/PortfolioController.php.html#82","App\\Http\\Controllers\\Admin\\PortfolioController::update","3"],[100,1,"Admin\/PortfolioController.php.html#119","App\\Http\\Controllers\\Admin\\PortfolioController::destroy","1"],[100,1,"Auth\/AuthenticatedSessionController.php.html#17","App\\Http\\Controllers\\Auth\\AuthenticatedSessionController::create","1"],[100,2,"Auth\/AuthenticatedSessionController.php.html#25","App\\Http\\Controllers\\Auth\\AuthenticatedSessionController::store","2"],[100,1,"Auth\/AuthenticatedSessionController.php.html#41","App\\Http\\Controllers\\Auth\\AuthenticatedSessionController::destroy","1"],[100,1,"Auth\/ConfirmablePasswordController.php.html#17","App\\Http\\Controllers\\Auth\\ConfirmablePasswordController::show","1"],[100,2,"Auth\/ConfirmablePasswordController.php.html#25","App\\Http\\Controllers\\Auth\\ConfirmablePasswordController::store","2"],[100,1,"Auth\/NewPasswordController.php.html#21","App\\Http\\Controllers\\Auth\\NewPasswordController::create","1"],[100,2,"Auth\/NewPasswordController.php.html#31","App\\Http\\Controllers\\Auth\\NewPasswordController::store","2"],[100,1,"Auth\/PasswordController.php.html#16","App\\Http\\Controllers\\Auth\\PasswordController::update","1"],[100,1,"Auth\/PasswordResetLinkController.php.html#16","App\\Http\\Controllers\\Auth\\PasswordResetLinkController::create","1"],[100,2,"Auth\/PasswordResetLinkController.php.html#26","App\\Http\\Controllers\\Auth\\PasswordResetLinkController::store","2"],[100,1,"Auth\/RegisteredUserController.php.html#21","App\\Http\\Controllers\\Auth\\RegisteredUserController::create","1"],[100,1,"Auth\/RegisteredUserController.php.html#31","App\\Http\\Controllers\\Auth\\RegisteredUserController::store","1"],[100,1,"HomeController.php.html#10","App\\Http\\Controllers\\HomeController::index","1"],[100,6,"OrderController.php.html#17","App\\Http\\Controllers\\OrderController::index","6"],[100,1,"OrderController.php.html#83","App\\Http\\Controllers\\OrderController::create","1"],[100,2,"OrderController.php.html#102","App\\Http\\Controllers\\OrderController::store","2"],[100,1,"PortfolioController.php.html#10","App\\Http\\Controllers\\PortfolioController::index","1"],[100,1,"ProfileController.php.html#17","App\\Http\\Controllers\\ProfileController::edit","1"],[100,2,"ProfileController.php.html#27","App\\Http\\Controllers\\ProfileController::update","2"],[100,1,"ProfileController.php.html#43","App\\Http\\Controllers\\ProfileController::destroy","1"]]</script>
+  <script type="text/javascript" defer>
+  const barLabels = [
+    '0%',
+    '0-10%',
+    '10-20%',
+    '20-30%',
+    '30-40%',
+    '40-50%',
+    '50-60%',
+    '60-70%',
+    '70-80%',
+    '80-90%',
+    '90-100%',
+    '100%'
+  ];
+  const barConfig = (name, fullName, values) => ({
+    axis: {
+      x: {
+        type: "category",
+        categories: barLabels,
+      },
+      y: {
+        label: {
+          text: `#${name}`,
+          position: 'outer-top',
+        },
+      },
+    },
+    bindto: `#${name}CoverageDistribution`,
+    data: {
+      columns: [
+        [fullName].concat(values),
+      ],
+      colors: {
+        [fullName]: "rgba(69, 114, 167, 0.75)",
+      },
+      type: "bar",
+    },
+    bar: {
+      width: {
+        ratio: 0.9,
+      },
+    },
+    grid: {
+      focus: {
+        show: false,
+      },
+      x: {
+        show: true,
+      },
+      y: {
+        show: true,
+      },
+    },
+    legend: {
+      show: false,
+    },
+    tooltip: {
+      contents: function (data) {
+        return `<table class="bb-tooltip"><tbody>
+            <tr><th colspan="2">Coverage ${barLabels[data[0].x]}</th></tr>
+            <tr><td class="value">${data[0].value} ${name}</td></tr>
+          </tbody></table>`;
+      },
+      grouped: false,
+    },
+  });
+  bb.generate(
+    barConfig('classes', "Class Coverage", [0,0,0,0,0,0,0,1,1,4,2,12])
+  );
+  bb.generate(
+    barConfig('methods', "Method Coverage", [1,0,0,0,0,0,1,2,4,5,5,36])
+  );
+
+  const scatterConfig = (name, complexityData) => ({
+    axis: {
+      x: {
+        label: {
+          text: 'Code Coverage (in percent)',
+          position: 'outer-right',
+        },
+        tick: {
+          values: [0, 20, 40, 60, 80, 100],
+        },
+      },
+      y: {
+        label: {
+          text: 'Cyclomatic Complexity',
+          position: 'outer-top',
+        },
+        min: 0,
+        padding: {
+          bottom: 0,
+          top: 5,
+        },
+      },
+    },
+    bindto: `#${name}Complexity`,
+    data: {
+      columns: [
+        ["complexity_x"].concat(complexityData.map(d => d[0])),
+        ["complexity"].concat(complexityData.map(d => d[1])),
+      ],
+      onclick: function(data, element) {
+        window.location = complexityData[data.index][2];
+      },
+      type: "scatter",
+      xs: {
+        "complexity": "complexity_x",
+      },
+    },
+    grid: {
+      focus: {
+        show: true,
+        y: true,
+      },
+      x: {
+        show: true,
+      },
+      y: {
+        show: true,
+      },
+    },
+    legend: {
+      show: false,
+    },
+    tooltip: {
+      contents: function (data) {
+        const coverage = Math.round(data[0].x);
+        const complexity = data[0].value;
+        const targetName = complexityData[data[0].index][3];
+        const crap = complexityData[data[0].index][4];
+        return `<table class="bb-tooltip"><tbody>
+            <tr><th colspan="2">${targetName}</th></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Coverage</td><td class="name">${coverage}%</td></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Complexity</td><td class="value">${complexity}</td></tr>
+            <tr class="bb-tooltip-name-complexity"><td>Crap</td><td class="value">${crap}</td></tr>
+          </tbody></table>`;
+      },
+      grouped: false,
+    },
+  });
+  const classComplexityData = JSON.parse(document.getElementById('complexity_class').textContent);
+  bb.generate(
+    scatterConfig("class", classComplexityData)
+  );
+  const methodComplexityData = JSON.parse(document.getElementById('complexity_method').textContent);
+  bb.generate(
+    scatterConfig("method", methodComplexityData),
+  );
+  </script>
+ </body>
+</html>

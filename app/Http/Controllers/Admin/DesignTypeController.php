@@ -104,22 +104,26 @@ class DesignTypeController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // 1. Perbaikan Validasi
         $request->validate([
             'nama_jenis' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'durasi' => 'required|integer|min:1',
-            'harga' => 'required|integer|min:0',
-            'is_active' => 'nullable|boolean',
+            'deskripsi'  => 'nullable|string',
+            'durasi'     => 'required|integer|min:1',
+            'harga'      => 'required|integer|min:0',
+            // Hapus 'boolean' karena checkbox HTML mengirim "on", bukan true/false
+            'is_active'  => 'nullable', 
         ]);
 
-        $type = DesignType::findOrFail($id);
+        $type = DesignType::where('design_type_id', $id)->firstOrFail(); 
+        // Atau jika Model sudah setup primary key: DesignType::findOrFail($id);
 
         $type->update([
             'nama_jenis' => $request->nama_jenis,
-            'deskripsi' => $request->deskripsi,
-            'durasi' => $request->durasi,
-            'harga' => $request->harga,
-            'is_active' => $request->has('is_active'),
+            'deskripsi'  => $request->deskripsi,
+            'durasi'     => $request->durasi,
+            'harga'      => $request->harga,
+            // Logika checkbox: jika ada di request = true, jika tidak = false
+            'is_active'  => $request->has('is_active') ? 1 : 0, 
         ]);
 
         return redirect()->route('design-types.index')

@@ -76,28 +76,50 @@
                 <p class="text-gray-500 mb-2">Referensi Desain</p>
 
                 @if($order->referensi_desain)
-                    {{-- Thumbnail --}}
-                    <div class="relative group w-full md:w-64">
-                        <img src="{{ asset('storage/' . $order->referensi_desain) }}"
-                                alt="Referensi Desain"
-                                @click="open = true"
-                                class="rounded-xl border-2 border-gray-100 shadow-sm cursor-zoom-in group-hover:opacity-90 transition object-cover h-40 w-full">
-                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                            <span class="bg-black/50 text-white px-3 py-1 rounded-full text-xs">Klik untuk Perbesar</span>
-                        </div>
-                    </div>
+                    {{-- Cek apakah file PDF --}}
+                    @php
+                        $isPdf = str_ends_with(strtolower($order->referensi_desain), '.pdf');
+                    @endphp
 
-                    {{-- Modal Preview --}}
-                    <div x-show="open" x-cloak x-transition.opacity
-                            class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/95 backdrop-blur-sm p-4"
-                            @click.self="open = false">
-                        <button @click="open = false" class="absolute top-5 right-5 text-white/70 hover:text-white transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    @if($isPdf)
+                        {{-- Tampilan Khusus PDF --}}
+                        <a href="{{ asset('storage/' . $order->referensi_desain) }}" 
+                        target="_blank"
+                        class="flex flex-col items-center justify-center w-full md:w-64 h-40 rounded-xl border-2 border-dashed border-gray-300 hover:border-indigo-500 hover:bg-indigo-50 transition group text-center p-4">
+                            
+                            {{-- Icon PDF --}}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500 mb-2 group-hover:scale-110 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
-                        </button>
-                        <img src="{{ asset('storage/' . $order->referensi_desain) }}" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl border border-white/20">
-                    </div>
+                            <span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-700">Lihat File PDF</span>
+                            <span class="text-xs text-gray-400 mt-1">Klik untuk membuka</span>
+                        </a>
+
+                    @else
+                        {{-- Tampilan Asli (Gambar) --}}
+                        <div class="relative group w-full md:w-64">
+                            <img src="{{ asset('storage/' . $order->referensi_desain) }}"
+                                    alt="Referensi Desain"
+                                    @click="open = true"
+                                    class="rounded-xl border-2 border-gray-100 shadow-sm cursor-zoom-in group-hover:opacity-90 transition object-cover h-40 w-full">
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                                <span class="bg-black/50 text-white px-3 py-1 rounded-full text-xs">Klik untuk Perbesar</span>
+                            </div>
+                        </div>
+
+                        {{-- Modal Preview (Hanya untuk Gambar) --}}
+                        <div x-show="open" x-cloak x-transition.opacity
+                                class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/95 backdrop-blur-sm p-4"
+                                @click.self="open = false">
+                            <button @click="open = false" class="absolute top-5 right-5 text-white/70 hover:text-white transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <img src="{{ asset('storage/' . $order->referensi_desain) }}" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl border border-white/20">
+                        </div>
+                    @endif
+
                 @else
                     <div class="p-4 border border-dashed border-gray-200 rounded-xl text-gray-400 text-sm italic">
                         Tidak ada referensi gambar yang dilampirkan.

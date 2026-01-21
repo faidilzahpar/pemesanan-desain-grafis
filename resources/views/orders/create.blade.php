@@ -84,27 +84,61 @@
 
         {{-- UPLOAD REFERENSI DESAIN --}}
         <div class="border border-dashed border-indigo-300 rounded-xl p-6 bg-indigo-50/40"
-            x-data>
+            x-data="{ 
+                file: null, 
+                preview: null, 
+                error: null,
+                validateFile(event) {
+                    const selected = event.target.files[0];
+                    
+                    // Jika batal pilih file
+                    if (!selected) return;
+
+                    // Cek Ukuran 
+                    if (selected.size > 10485760) {
+                        this.error = 'Ukuran file terlalu besar! Maksimal 10MB.';
+                        this.file = null;
+                        this.preview = null;
+                        event.target.value = ''; // Reset input
+                        return;
+                    }
+
+                    // Cek Tipe File
+                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+                    if (!validTypes.includes(selected.type)) {
+                        this.error = 'Format file tidak didukung! Hanya JPG, PNG, atau PDF.';
+                        this.file = null;
+                        this.preview = null;
+                        event.target.value = ''; 
+                        return;
+                    }
+
+                    // Jika Lolos Validasi
+                    this.error = null;
+                    this.file = selected;
+
+                    // Buat Preview hanya jika Gambar
+                    if (selected.type.startsWith('image/')) {
+                        this.preview = URL.createObjectURL(selected);
+                    } else {
+                        this.preview = null; // PDF tidak perlu preview gambar
+                    }
+                }
+            }">
 
             {{-- Hidden Input --}}
             <input type="file"
                 name="referensi_desain"
                 x-ref="fileInput"
+                accept=".jpg,.jpeg,.png,.pdf"
                 class="hidden"
-                @change="
-                        file = $event.target.files[0];
-                        if (file && file.type.startsWith('image/')) {
-                            preview = URL.createObjectURL(file);
-                        } else {
-                            preview = null;
-                        }
-                ">
+                @change="validateFile($event)">
 
-            {{-- Dropzone --}}
+            {{-- Dropzone Area --}}
             <div @click="$refs.fileInput.click()"
-                class="cursor-pointer bg-white rounded-xl p-6 text-center
-                        hover:bg-indigo-50 transition">
+                class="cursor-pointer bg-white rounded-xl p-6 text-center hover:bg-indigo-50 transition relative">
 
+                {{-- TAMPILAN AWAL (Belum ada file) --}}
                 <template x-if="!file">
                     <div>
                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -118,26 +152,47 @@
                             Klik untuk upload referensi desain
                         </p>
                         <p class="text-xs text-slate-500 mt-1">
-                            JPG, PNG, atau PDF
+                            JPG, PNG, atau PDF (Maks. 10MB)
                         </p>
                     </div>
                 </template>
 
-                {{-- PREVIEW --}}
+                {{-- TAMPILAN SETELAH UPLOAD (File Valid) --}}
                 <template x-if="file">
-                    <div class="flex flex-col items-center space-y-2">
+                    <div class="flex flex-col items-center space-y-3">
+                        
+                        {{-- Preview Gambar --}}
                         <template x-if="preview">
-                            <img :src="preview"
-                                class="max-h-40 rounded-lg border shadow">
+                            <img :src="preview" class="max-h-40 rounded-lg border shadow object-contain">
                         </template>
 
-                        <p class="text-sm font-semibold" x-text="file.name"></p>
-                        <p class="text-xs text-slate-500"
-                        x-text="(file.size / 1024 / 1024).toFixed(2) + ' MB'"></p>
+                        {{-- Ikon PDF (Jika yang diupload PDF) --}}
+                        <template x-if="!preview && file.type === 'application/pdf'">
+                            <div class="h-20 w-20 bg-red-100 text-red-500 rounded-lg flex items-center justify-center">
+                                <span class="font-bold text-xl">PDF</span>
+                            </div>
+                        </template>
+
+                        <div class="text-center">
+                            <p class="text-sm font-semibold text-slate-800" x-text="file.name"></p>
+                            <p class="text-xs text-slate-500" x-text="(file.size / 1024 / 1024).toFixed(2) + ' MB'"></p>
+                            <p class="text-xs text-indigo-600 mt-1 font-medium">Klik untuk ganti file</p>
+                        </div>
                     </div>
                 </template>
-
+                
             </div>
+
+            {{-- PESAN ERROR (Muncul jika file ditolak) --}}
+            <template x-if="error">
+                <div class="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-sm font-medium" x-text="error"></span>
+                </div>
+            </template>
+
         </div>
 
         {{-- Metode Pembayaran --}}

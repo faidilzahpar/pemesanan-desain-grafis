@@ -134,7 +134,7 @@ class InvoiceController extends Controller
         }
 
         $request->validate([
-            'bukti_pembayaran' => 'required|file|max:10240',
+            'bukti_pembayaran' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
         $path = $request->file('bukti_pembayaran')

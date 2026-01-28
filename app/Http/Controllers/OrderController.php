@@ -67,8 +67,7 @@ class OrderController extends Controller
             ? $activeInvoice->created_at->copy()->addHours(24)
             : null;
 
-        $visibleInvoices = $order->invoices
-            ->whereNotNull('bukti_path');
+        $visibleInvoices = $order->invoices;
 
         return view('orders.show', compact(
             'order',

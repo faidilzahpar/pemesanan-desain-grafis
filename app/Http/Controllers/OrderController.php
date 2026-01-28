@@ -248,4 +248,33 @@ class OrderController extends Controller
 
         return response()->download($fullPath, $downloadName);
     }
+
+    public function requestRevision(Order $order)
+    {
+        // 1. Validasi Pemilik
+        if (Auth::id() !== $order->user_id) {
+            abort(403);
+        }
+
+        // 2. Validasi Status (Hanya bisa revisi jika statusnya 'Menunggu Konfirmasi Pelanggan')
+        // Jika status sudah 'Revisi', user hanya diarahkan ke WA tanpa update DB lagi (supaya created_at/updated_at tidak berubah terus)
+        if ($order->status_pesanan === 'Menunggu Konfirmasi Pelanggan') {
+            $order->update([
+                'status_pesanan' => 'Revisi'
+            ]);
+        }
+
+        // 3. Susun Pesan WhatsApp
+        $phoneNumber = '6288706468109'; // Ganti dengan nomor admin
+        $message = "ID Pesanan : {$order->order_id}\n" .
+                   "Jenis Desain : {$order->designType->nama_jenis}\n" .
+                   "Saya ingin mengajukan revisi sebagai berikut:\n" .
+                   "Catatan Revisi:\n- ";
+        
+        $whatsappUrl = "https://wa.me/{$phoneNumber}?text=" . urlencode($message);
+
+        // 4. Redirect User ke WhatsApp
+        // Gunakan away() untuk link eksternal
+        return redirect()->away($whatsappUrl);
+    }
 }

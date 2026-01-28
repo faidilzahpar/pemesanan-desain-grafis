@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use App\Models\Invoice;
 
 class OrderController extends Controller
 {
@@ -137,93 +138,107 @@ class OrderController extends Controller
 
         $uploadedFile = $request->file('file');
 
-        $totalFiles  = $order->orderFiles()->count();
+        // Hitung jumlah revisi yang SUDAH ADA di database
         $revisiCount = $order->orderFiles()
             ->where('tipe_file', 'Revisi')
             ->count();
+
+        $totalFiles = $order->orderFiles()->count();
         
-        // 1. Cek STATUS terlebih dahulu. Jika statusnya 'Menunggu File Final', 
-        // maka file yang diupload PASTI adalah Final, tidak peduli jumlah revisinya.
+        // --- 1. PENENTUAN TIPE FILE & STATUS ---
+        $isMaxRevisionReached = false;
+        $isTrueFinal          = false; 
+
+        // KASUS A: Upload File Final yang Asli (Setelah lunas)
         if ($order->status_pesanan === 'Menunggu File Final') {
             $tipe = 'Final';
+            $isTrueFinal = true;
         } 
-        // 2. Jika belum ada file sama sekali -> Preview
+        // KASUS B: Upload Pertama Kali (Preview Awal)
         elseif ($totalFiles === 0) {
             $tipe = 'Preview';
         } 
-        // 3. Jika revisi masih kurang dari 3 -> Revisi
-        elseif ($revisiCount < 3) {
-            $tipe = 'Revisi';
+        // KASUS C: CEK APAKAH INI REVISI TERAKHIR? (LOGIKA YANG DIPERBAIKI)
+        // Jika di database sudah ada 2 file revisi, maka upload ini adalah revisi ke-3 (BATAS MAX).
+        elseif ($revisiCount >= 2) { 
+            $tipe = 'Revisi'; // Tetap namakan revisi biar kena watermark
+            $isMaxRevisionReached = true; // Tandai bahwa ini batas akhir
         } 
-        // 4. Fallback jika slot revisi habis
+        // KASUS D: Masih revisi biasa (Revisi ke-1 atau ke-2)
         else {
-            $tipe = 'Final';
+            $tipe = 'Revisi';
         }
 
-        // --- LOGIKA WATERMARK ---
-        
-        // Cek apakah file adalah gambar
+        // --- 2. LOGIKA PENYIMPANAN FILE (WATERMARK) ---
         $isImage = str_starts_with($uploadedFile->getMimeType(), 'image/');
-        
-        // Path penyimpanan (tanpa nama file dulu)
         $storagePath = "order-files/{$order->order_id}";
-        
-        // Nama file random hash
         $filename = $uploadedFile->hashName();
         $fullPath = $storagePath . '/' . $filename;
+        $pathForDb = null;
 
-        // JIKA BUKAN FINAL & ADALAH GAMBAR => KASIH WATERMARK
+        // Jika bukan Final asli & berupa gambar => KASIH WATERMARK
         if ($tipe !== 'Final' && $isImage) {
             
-            // 1. Setup Image Manager
-            $manager = new ImageManager(new Driver());
-
-            // 2. Baca file yang diupload
+            // Setup Image Manager
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             $image = $manager->read($uploadedFile);
 
-            // 3. Baca watermark (Pastikan file public/watermark.png ADA)
+            // Tempel Watermark
             if (file_exists(public_path('watermark.png'))) {
-
-
-                // Atau baca langsung
-                $watermark = public_path('watermark.png');
-
-                // 4. Tempel Watermark (Posisi: Center, Opacity: 50%)
-                // Param: (source, position, x, y, opacity)
-                $image->place($watermark, 'center', 0, 0, 50);
+                $image->place(public_path('watermark.png'), 'center', 0, 0, 50);
             }
 
-            // 5. Simpan (Encode) kembali ke format aslinya
-            $encoded = $image->toPng(); // atau toJpeg() sesuai kebutuhan, toPng() aman buat transparansi
-
-            // 6. Simpan manual ke Storage Public
-            Storage::disk('public')->put($fullPath, $encoded);
+            $encoded = $image->toPng();
             
-            // Set path untuk database
-            $path = $fullPath;
+            // SIMPAN FISIK FILE
+            \Illuminate\Support\Facades\Storage::disk('public')->put($fullPath, $encoded);
+            $pathForDb = $fullPath;
 
         } else {
-            // JIKA FINAL ATAU BUKAN GAMBAR (PDF/ZIP) => SIMPAN BIASA
-            $path = $uploadedFile->store($storagePath, 'public');
+            // Simpan Biasa (PDF/Zip atau Final Image)
+            $pathForDb = $uploadedFile->store($storagePath, 'public');
         }
 
-        // --- END LOGIKA WATERMARK ---
-
+        // --- 3. SIMPAN DATA KE DATABASE ---
         $order->orderFiles()->create([
             'tipe_file' => $tipe,
-            'path_file' => $path,
+            'path_file' => $pathForDb,
         ]);
 
-        // Status pesanan
-        $order->update([
-            'status_pesanan' => $tipe === 'Final'
-                ? 'Selesai'
-                : 'Menunggu Konfirmasi Pelanggan',
-        ]);
+        // --- 4. UPDATE STATUS & GENERATE INVOICE ---
+        $msg = '';
 
-        return back()->with(
-            'success',
-            "File {$tipe} berhasil diunggah."
-        );
+        if ($isTrueFinal) {
+            // Selesai total
+            $order->update(['status_pesanan' => 'Selesai']);
+            $msg = "File Final terkirim. Pesanan Selesai.";
+
+        } elseif ($isMaxRevisionReached) {
+            // --- INI LOGIKA PENTINGNYA ---
+            // Karena ini revisi ke-3, JANGAN tanya ke user lagi.
+            // Langsung paksa ke status 'Menunggu Pelunasan'.
+            
+            // Cek invoice pelunasan (biar gak dobel)
+            $existingInvoice = $order->invoices()->where('jenis_invoice', 'Pelunasan')->first();
+            
+            if (!$existingInvoice) {
+                \App\Models\Invoice::create([
+                    'order_id'          => $order->order_id,
+                    'jenis_invoice'     => 'Pelunasan',
+                    'status_pembayaran' => 'Belum Dibayar',
+                    'bukti_path'        => null,
+                ]);
+            }
+
+            $order->update(['status_pesanan' => 'Menunggu Pelunasan']);
+            $msg = "Batas revisi (3x) tercapai. Invoice pelunasan diterbitkan.";
+
+        } else {
+            // Revisi biasa (ke-1 atau ke-2), lempar bola ke user
+            $order->update(['status_pesanan' => 'Menunggu Konfirmasi Pelanggan']);
+            $msg = "File {$tipe} diunggah. Menunggu tanggapan pelanggan.";
+        }
+
+        return back()->with('success', $msg);
     }
 }

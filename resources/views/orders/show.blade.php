@@ -288,22 +288,15 @@
 
 
         {{-- AJUKAN REVISI --}}
-        @if(in_array($order->status_pesanan, [
-            'Menunggu Konfirmasi Pelanggan',
-            'Revisi'
-        ]))
-            <a href="https://wa.me/6288706468109?text={{ urlencode(
-                'ID Pesanan : '.$order->order_id.'
-Jenis Desain : '.$order->designType->nama_jenis.'
-Saya ingin mengajukan revisi sebagai berikut:
-Catatan Revisi:
-- '
-            ) }}"
-               target="_blank"
-               class="px-6 py-3 bg-green-600 text-white rounded-xl
-                      hover:bg-green-700 transition font-bold">
-                Ajukan Revisi
-            </a>
+        @if(in_array($order->status_pesanan, ['Menunggu Konfirmasi Pelanggan']))
+            <form action="{{ route('orders.revisi', $order->order_id) }}" method="POST" target="_blank">
+                @csrf
+                <button type="submit" 
+                        onclick="setTimeout(function(){ location.reload(); }, 2000);"
+                        class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-bold block text-center w-full">
+                    <i class="fab fa-whatsapp mr-2"></i> Ajukan Revisi
+                </button>
+            </form>
         @endif
 
         {{-- SETUJUI DESAIN --}}

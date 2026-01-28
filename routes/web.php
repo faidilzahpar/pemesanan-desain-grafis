@@ -40,6 +40,8 @@ Route::middleware('auth')->group(function () {
         ->name('orders.index');
     Route::get('/pesanan-saya/{order}', [OrderController::class, 'show'])
         ->name('orders.show');
+    Route::post('/orders/{order}/revisi', [App\Http\Controllers\OrderController::class, 'requestRevision'])
+        ->name('orders.revisi');
     Route::post('/pesanan/{order}/approve', [OrderController::class, 'approve'])
         ->name('orders.approve');
     Route::get('/orders/{order}/status-html', [OrderController::class, 'getStatusHtml'])

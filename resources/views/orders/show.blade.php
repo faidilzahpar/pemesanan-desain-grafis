@@ -8,10 +8,55 @@
     {{-- HEADER --}}
     <div class="flex justify-between items-start">
         <div>
-            <h1 class="text-3xl font-extrabold text-slate-900">
-                Detail Pesanan
-            </h1>
-            <p class="text-slate-500 text-sm">
+            <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-extrabold text-slate-900">
+                    Detail Pesanan
+                </h1>
+
+                {{-- TOMBOL CHAT (PINDAHAN DARI INDEX) --}}
+                @php
+                    $isActive = $order->status_pesanan === 'Revisi';
+                    
+                    $initialUnread = $order->chats
+                        ->where('user_id', '!=', Auth::id())
+                        ->where('is_read', 0)
+                        ->count();
+                @endphp
+
+                <div x-data="{
+                    unreadCount: {{ $initialUnread }},
+                    init() {
+                        if (window.Echo) {
+                            window.Echo.leave('order.{{ $order->order_id }}');
+                            Echo.private('order.{{ $order->order_id }}')
+                                .listen('MessageSent', (e) => {
+                                    if (e.user_id != '{{ Auth::id() }}') {
+                                        this.unreadCount++;
+                                    }
+                                });
+                        }
+                    }
+                }">
+                    <a href="{{ route('orders.chat', $order->order_id) }}" 
+                       class="relative p-2 rounded-full transition-colors duration-200 block {{ $isActive ? 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50' : 'text-slate-300 hover:text-slate-500 hover:bg-slate-100' }}"
+                       title="{{ $isActive ? 'Diskusi Revisi' : 'Lihat Riwayat Chat' }}">
+                        
+                        {{-- Icon Chat --}}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+
+                        {{-- Notifikasi Angka --}}
+                        <div x-show="unreadCount > 0" 
+                             x-transition.scale
+                             class="absolute top-0 right-0 -mt-1 -mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 ring-2 ring-white">
+                            <span class="text-[10px] font-bold text-white leading-none" x-text="unreadCount"></span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <p class="text-slate-500 text-sm mt-1">
                 ID Pesanan: {{ $order->order_id }}
             </p>
         </div>
@@ -201,11 +246,10 @@
                             </button>
 
                             {{-- 2. MODAL (POPUP GAMBAR) --}}
-                            {{-- Gunakan 'template' atau taruh div ini agar tidak mengganggu layout flex, tapi dengan fixed inset-0 aman --}}
                             <div x-show="open" 
                                 x-cloak 
                                 x-transition.opacity
-                                style="display: none;" {{-- Mencegah flicker saat loading --}}
+                                style="display: none;" 
                                 class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/95 backdrop-blur-sm p-4"
                                 @keydown.escape.window="open = false">
                                 
@@ -213,7 +257,7 @@
                                 <button @click="open = false" class="absolute top-5 right-5
                             text-white/70 hover:text-white transition cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
 
@@ -265,62 +309,58 @@
     {{-- AKSI --}}
     <div class="flex flex-wrap gap-3">
 
-        {{-- BELUM BAYAR (Tetap gunakan logika PHP standar untuk tombol) --}}
+        {{-- 1. TOMBOL BAYAR (Logika Lama - Tetap) --}}
         @php
-            // Hitung ulang untuk tombol di bawah (agar tidak undefined)
             $activeInvoiceForButton = $order->invoices->sortByDesc('created_at')->first();
         @endphp
 
         @if(
             in_array($order->status_pesanan, ['Menunggu DP', 'Menunggu Pelunasan'])
             && $activeInvoiceForButton
-            && in_array($activeInvoiceForButton->status_pembayaran, [
-                'Belum Dibayar',
-                'Pembayaran Ditolak'
-            ])
+            && in_array($activeInvoiceForButton->status_pembayaran, ['Belum Dibayar', 'Pembayaran Ditolak'])
         )
             <a href="{{ route('invoices.show', $activeInvoiceForButton->invoice_id) }}"
-            class="px-6 py-3 bg-indigo-600 text-white rounded-xl
-                    hover:bg-indigo-700 transition font-bold">
-                Bayar Sekarang
+               class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-bold">
+                <i class="fas fa-money-bill-wave mr-2"></i> Bayar Sekarang
             </a>
         @endif
 
 
-        {{-- AJUKAN REVISI --}}
-        @if(in_array($order->status_pesanan, ['Menunggu Konfirmasi Pelanggan']))
-            <form action="{{ route('orders.revisi', $order->order_id) }}" method="POST" target="_blank">
+        {{-- 2. TOMBOL AJUKAN REVISI (Hanya muncul saat Menunggu Konfirmasi) --}}
+        {{-- Fungsinya: Trigger status berubah jadi 'Revisi' lalu redirect ke Chat --}}
+        @if($order->status_pesanan === 'Menunggu Konfirmasi Pelanggan')
+            <form action="{{ route('orders.revisi', $order->order_id) }}" method="POST">
                 @csrf
                 <button type="submit" 
-                        onclick="setTimeout(function(){ location.reload(); }, 2000);"
-                        class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-bold block text-center w-full">
-                    <i class="fab fa-whatsapp mr-2"></i> Ajukan Revisi
+                        class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-bold">
+                    <i class="fas fa-edit mr-2"></i> Ajukan Revisi
                 </button>
             </form>
         @endif
 
-        {{-- SETUJUI DESAIN --}}
+        {{-- [DIHAPUS] TOMBOL DISKUSI REVISI (SUDAH PINDAH KE HEADER) --}}
+
+        {{-- 4. TOMBOL SETUJUI DESAIN (Hanya muncul saat Menunggu Konfirmasi & Ada File) --}}
         @if(
             $order->status_pesanan === 'Menunggu Konfirmasi Pelanggan'
             && !$order->orderFiles->where('tipe_file', 'Final')->count()
         )
-            <form method="POST"
-                action="{{ route('orders.approve', $order->order_id) }}">
+            <form method="POST" action="{{ route('orders.approve', $order->order_id) }}">
                 @csrf
                 <button type="submit"
-                        class="px-6 py-3 bg-indigo-600 text-white rounded-xl
-                            hover:bg-indigo-700 transition font-bold">
-                    Setujui Desain
+                        class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-bold">
+                    <i class="fas fa-check-circle mr-2"></i> Setujui Desain
                 </button>
             </form>
         @endif
 
-        {{-- KEMBALI --}}
+
+        {{-- 5. TOMBOL KEMBALI --}}
         <a href="{{ route('orders.index') }}"
-           class="px-6 py-3 bg-slate-200 text-slate-700 rounded-xl
-                  hover:bg-slate-300 transition font-bold">
+           class="px-6 py-3 bg-slate-200 text-slate-700 rounded-xl hover:bg-slate-300 transition font-bold">
             Kembali
         </a>
+
     </div>
 
 </div>

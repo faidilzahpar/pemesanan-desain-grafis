@@ -82,4 +82,9 @@ class Order extends Model
     {
         return $this->belongsTo(PaymentMethod::class, 'payment_method_id', 'payment_method_id');
     }
+
+    public function chats()
+    {
+        return $this->hasMany(Chat::class, 'order_id', 'order_id');
+    }
 }

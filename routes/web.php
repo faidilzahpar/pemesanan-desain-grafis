@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\PortfolioController as AdminPortfolio;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ChatController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +52,17 @@ Route::middleware('auth')->group(function () {
         ->name('orders.file.download');
     Route::get('/invoices/{invoice}/file', [InvoiceController::class, 'showFile'])
         ->name('invoices.file');
+    // Chat & Upload
+    Route::get('/orders/{order}/chat', [ChatController::class, 'chatPage'])
+        ->name('orders.chat');
+    Route::get('/orders/{order}/messages', [ChatController::class, 'fetchMessages']);
+    Route::post('/orders/{order}/messages', [ChatController::class, 'sendMessage']);
+    Route::post('/orders/{order}/chat/upload', [ChatController::class, 'uploadChatFile'])
+        ->name('orders.chat.upload');
+    Route::delete('/chats/{chat}', [ChatController::class, 'destroy'])
+        ->name('chats.destroy');
+    Route::post('/orders/{order}/mark-read', [ChatController::class, 'markAsRead'])
+        ->name('chats.markRead');
 });
 
 /*
